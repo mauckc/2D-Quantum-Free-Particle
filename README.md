@@ -16,6 +16,15 @@ Initial Wave Function Conditions
  phi - Real Part of the wavefunction
  chi - Complex Part of the wavefunction
  
+     PARTIAL DIFFERNTIAL EQUATION EXAMPLE FOR WAVEFUNTION IN ONE DIMENSION (X)
+     
+     i*(dpsi/dx) = - (1/2)*( dpsi/dx)^2 + U(x)* psi(x)
+     where psi(x)= psireal(x) + i*psiimag(x)
+     
+ This version implements a "split-step" Crank-Nicolson method
+ We evolve our wave function in the position basis.
+ Then we fourier transform the wavefunction to evolve it in the momentum basis
+ 
  data schema:
  
      phi[2][2][N][N]
