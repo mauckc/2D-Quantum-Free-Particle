@@ -21,16 +21,16 @@ Initial Wave Function Conditions
      phi[2][2][N][N]
      chi[2][2][N][N]
  
-  first row: [2] - Used for before and after partial differential equation solving step
-  second row: [2] - Real and Imaginary parts of each wave function
-  third row: [N] - X dimension of our 2D simulation space
-  fourth row: [N] - Y dimension of our 2D simulation space
+     first row: [2] - Used for before and after partial differential equation solving step
+     second row: [2] - Real and Imaginary parts of each wave function
+     third row: [N] - X dimension of our 2D simulation space
+     fourth row: [N] - Y dimension of our 2D simulation space
  
   Variables for keeping track of total energy stored in the simualtion.
   
-            realsum += psi[0][RE][index];
-            complexsum += psi[0][IM][index];
-            probabilitysum += psi[0][RE][index] * psi[0][RE][index] + psi[0][IM][index] * psi[0][IM][index];
+      realsum += psi[0][RE][index];
+      complexsum += psi[0][IM][index];
+      probabilitysum += psi[0][RE][index] * psi[0][RE][index] + psi[0][IM][index] * psi[0][IM][index];
                   
  Gaussian Distribution in 2D
         
