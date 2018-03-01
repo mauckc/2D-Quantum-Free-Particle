@@ -5,15 +5,14 @@ HOW TO MODIFY PROGRAM SPACE AND INITIAL CONDITION
 
  Simulation Structure
  
- N - single side length of our N by N array using a standard indexing
- t - current program time
- dt - time interval between program time steps
- t0 - intial program time
- tf - final program time ( simulation ends once t = tf
- L - Size of our 2D simulation space in program units
+N - single side length of our N by N array using a standard indexing
+t - current program time
+dt - time interval between program time steps
+t0 - intial program time
+tf - final program time ( simulation ends once t = tf
+L - Size of our 2D simulation space in program units
  
- Initial Wave Function Conditions
- 
+Initial Wave Function Conditions 
  phi - Real Part of the wavefunction
  chi - Complex Part of the wavefunction
  
