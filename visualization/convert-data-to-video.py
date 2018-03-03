@@ -11,10 +11,18 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
 import subprocess
+from datetime import datetime
+
+# set starttime values
+t1 = datetime.now()
 
 # Set dimension of our 2D grid
 n = 128
 noutputs = 100
+
+print('Setting Dimensions\n n=%d \n' % (n))
+print('noutputs=%d \n' % (noutputs))
+
 # Load data files from slices output directory
 DataIn = np.loadtxt('../slices/slices_fields_0.dat')
 
@@ -25,6 +33,8 @@ Allprob = np.zeros((noutputs, n*n))
 for x in xrange(noutputs):
     AllSlicesData[x] = np.loadtxt('../slices/slices_fields_%d.dat' % (x))
     Allprob[x] = AllSlicesData[x,::,4]
+    if x % (4):
+        print('loading slice %d...\n' % (x))
 
 # Interpret All slices data fields
 indexA = AllSlicesData[-1,::,0]
@@ -63,10 +73,21 @@ for x in xrange(noutputs):
     plt.savefig('figures/prob2D_%d.png' % (x))
     print('saving frame %d \n' % (x))
 
-plt.show()
+t2 = datetime.now()
+delta = t2 - t1
+print(delta)
+
+#plt.show()
+print('done plotting... \n')
+print('running compilepngs2video.sh...')
+
+#plt.show()
 
 rc = subprocess.call("./compilepngs2video.sh",shell=True)
 
+t2 = datetime.now()
+delta = t2 - t1
+print(delta)
 # To compile the images into a video use ffmpeg
 # ffmpeg can be installed on ubuntu using "sudo apt-get install ffmpeg"
 # ffmpeg -r 30 -f image2 -s 800x800 -i figures/prob2D_%01d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p test.mp4
