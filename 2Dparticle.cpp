@@ -20,20 +20,22 @@
 #include <fftw3.h>
 #include <complex>
 #include <functional>
+#include <ctime>
 
 using namespace std;
 
-#define N 128
-#define dt 0.1
+#define N 256 // recommend 256 or above for stability
+#define dt 0.01 // recommend 0.01 or below for stability
 #define L 20.
 
 #define RE 0
 #define IM 1
 
 #define t0 0.
-#define tf 10.
+#define tf 20.
 
-#define div 1
+#define div 20
+#define desample 4 //desampling factor for output after calculation
 
 #define AMPLITUDE 1.
 
@@ -47,6 +49,8 @@ double ky = 0.0;
 
 int num = 0; //for outfield iterator
 
+double noutputs = (tf - t0)/(dt*div) ;
+
 double t = 0.0; //this variable stores the time
 
 double psi[2][2][N][N]; //this stores the wavefunction
@@ -54,7 +58,7 @@ double chi[2][2][N][N]; //this stores the wavefunction in fourier space
 
 double dx = L/N;
 
-double sigma = 0.7;
+double sigma = 0.73;
 int slicenum = 0;
 double A = 1.;
 
@@ -74,7 +78,8 @@ void outputfield(int first)//outputs the field values
 
     for (int j = 0; j < N; j++)
     {
-        for ( int i = 0 ; i < N; i++) {
+        for ( int i = 0 ; i < N; i++)
+        {
 
         psiprob[j][i] = psi[0][RE][j][i] * psi[0][RE][j][i] + psi[0][IM][j][i] * psi[0][IM][j][i];
 
@@ -83,17 +88,25 @@ void outputfield(int first)//outputs the field values
 
     for (int j = 0; j < N; j++)
     {
-        for (int i = 0; i < N; i++){
-        fprintf(slicefield,"%d  %d  %lf  %lf  %lf", i , j, psi[0][RE][j][i], psi[0][IM][j][i], psiprob[j][i]);
-        fprintf(slicefield,"\n");
+      for (int i = 0; i < N; i++)
+      {
+          if (i%desample==0){
+          fprintf(slicefield,"%d  %d  %lf  %lf  %lf", i , j, psi[0][RE][j][i], psi[0][IM][j][i], psiprob[j][i]);
+          fprintf(slicefield,"\n");
+          }
         }
      }
 
     fclose(slicefield);
 }
 
+//void viewfield(int first)//shows fields
+//{
+  // Use openCV to draw a 2D image based on the relative propability of each pixel
+//}
+
 double potential(double x){
-    double U = 25.0;
+    double U = 50.0;
     return U * ( 1.0 - pow(cos(6*3.141592*(0.65*x-L/2)/L)/2,2.0));
 }
 
@@ -152,19 +165,25 @@ int main ()
 {
     t=0.0;
 
+    std::time_t result = std::time(nullptr);
+    std::cout << std::asctime(std::localtime(&result))
+              << result << " seconds since the Epoch\n";
+
+    printf("number of output files: %lf", noutputs);
+
     fftw_complex *in, *out, *in2,*out2;
     fftw_plan plan, plan2;//plan will be foward and plan2 will be backward
 
     printf("\n***********************************\n\nSetting gaussian wavefunction... \n");
 
     for (int j = 0; j < N; j++){
-        y = (j*dx) - (L/2.0);
+        y = (j*dx) - (L/3.8);
 
         for (int i = 0; i < N; i++){
 
-                x = (i*dx) - (L/2.0);
-                kx = 1.0*3.141592/L;
-                ky = 10.0*3.141592/L;
+                x = (i*dx) - (L/3.8);
+                kx = 20.0*3.141592/L;
+                ky = 4.0*3.141592/L;
                 A  = AMPLITUDE;
 
 
@@ -294,7 +313,7 @@ int main ()
 
         t += dt;
         num++;
-
+        printf("*** program time: %lf \n",t);
         if (num % div == 0)
         {
             outputfield(slicenum);
@@ -312,7 +331,12 @@ int main ()
 
     fftw_free(in); fftw_free(in2); fftw_free(out); fftw_free(out2);
 
+    std:time_t resultold = result;
+    result = std::time(nullptr);
+    std::cout << std::asctime(std::localtime(&result))
+              << result - resultold << " seconds since the Epoch\n";
 
+    printf("\n____ number of output files: %lf ____", noutputs);
 
 
     return 0;
