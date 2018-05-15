@@ -1,5 +1,11 @@
 "# 2D-Quantum-Free-Particle" 
 
+This repository has a wiki!
+https://github.com/mauckc/2D-Quantum-Free-Particle/wiki
+
+and a python visualization sub-repository!
+https://github.com/mauckc/2D-Quantum-Free-Particle/tree/master/visualization
+
 _________________________________________________
 HOW TO MODIFY PROGRAM SPACE AND INITIAL CONDITION
 
