@@ -1,6 +1,5 @@
 "# 2D-Quantum-Free-Particle" 
-
-This repository has a wiki!
+This repository has a wiki page!
 https://github.com/mauckc/2D-Quantum-Free-Particle/wiki
 
 and a python visualization sub-repository!
