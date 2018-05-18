@@ -6,7 +6,7 @@ and a python visualization sub-repository!
 https://github.com/mauckc/2D-Quantum-Free-Particle/tree/master/visualization
 
 <p align="center">
-  <img src="./media/Particle_2D_1.gif" width="430" height="300"/>
+  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/media/particle_2D_1.gif"/>
 </p>
 
 _________________________________________________
