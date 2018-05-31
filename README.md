@@ -26,9 +26,14 @@ Initial Wave Function Conditions
  chi - Complex Part of the wavefunction
  
      PARTIAL DIFFERNTIAL EQUATION EXAMPLE FOR WAVEFUNTION IN ONE DIMENSION (X)
-     
-     i*(dpsi/dx) = - (1/2)*( dpsi/dx)^2 + U(x)* psi(x)
-     where psi(x)= psireal(x) + i*psiimag(x)
+
+  <img src="https://latex.codecogs.com/gif.latex?%5Cbg_black%20i%20%28%5Cfrac%7Bd%5Cpsi%7D%7Bdx%7D%29%20%3D%20-%5Cfrac%7B1%7D%7B2%7D%20%28%5Cfrac%7Bd%5Cpsi%7D%7Bdx%7D%29%5E%7B2%7D%20&plus;%20U%28x%29%5Cpsi%28x%29"/>
+</p>
+
+where:
+
+<img src="https://latex.codecogs.com/gif.latex?%5Cpsi%28x%29%20%3D%20%5Cpsi_%7B%5Cmathbb%7BR%7D%7D%20%28x%29%20&plus;%20i%20%5Cast%20%5Cpsi_%7B%5Cmathbb%7BI%7D%7D%28x%29"/>
+</p>
      
  This version implements a "split-step" Crank-Nicolson method
  We evolve our wave function in the position basis.
