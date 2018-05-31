@@ -2,11 +2,6 @@
 
 This program numerically integrates the Schrodinger equation on finite complex scalar fields for simulating interactions of quantum particles under varied observation.
 
-This version implements a second-order in time finite difference method known as the "split-step" Crank-Nicolson method. By calculating energy states using the hamiltonian in both position and momentum space, this program is able to achieve numerically stable integration, which is necessary for finite difference methods.
-
-Each time-iteration, the program evolves the wave function in the position basis. Then we apply a Fourier transform to the wave function representation in position space to calculate the wave function representation in momentum space.
-
-Once the momentum space representation has been solved by FFTw we can evolve the non-linear term of the Hamiltonian in the momentum basis/phase-space. 
 
 <img src="https://latex.codecogs.com/gif.latex?%5Cpsi%28x%29%20%3D%20%5Cpsi_%7B%5Cmathbb%7BR%7D%7D%20%28x%29%20&plus;%20i%20%5Cast%20%5Cpsi_%7B%5Cmathbb%7BI%7D%7D%28x%29"/>
 </p>
@@ -34,10 +29,16 @@ HOW TO MODIFY PROGRAM SPACE AND INITIAL CONDITION
      t0 - intial program time
      tf - final program time ( simulation ends once t = tf
      L - Size of our 2D simulation space in program units
- 
+     
 Initial Wave Function Conditions 
- phi - Real Part of the wavefunction
- chi - Complex Part of the wavefunction
+ phi - position space representation of the wavefunction
+ chi - momentum space representation of the wavefunction
+
+This version implements a second-order in time finite difference method known as the "split-step" Crank-Nicolson method. By calculating energy states using the hamiltonian in both position and momentum space, this program is able to achieve numerically stable integration, which is necessary for finite difference methods.
+
+Each time-iteration, the program evolves the wave function in the position basis. Then we apply a Fourier transform to the wave function representation in position space to calculate the wave function representation in momentum space.
+
+Once the momentum space representation has been solved by FFTw we can evolve the non-linear term of the Hamiltonian in the momentum basis/phase-space. 
 
      PARTIAL DIFFERNTIAL EQUATION EXAMPLE FOR WAVEFUNTION IN ONE DIMENSION (X)
 
