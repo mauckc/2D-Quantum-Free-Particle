@@ -62,23 +62,23 @@ we take the separable Hamiltonian:
 <img src="https://latex.codecogs.com/gif.latex?H%3D%5Cfrac%7Bp%5E2%7D%7B2m%7D&plus;V"/>
 </p>
 
-</p>
-<img src="https://latex.codecogs.com/gif.latex?i%5Chbar%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20t%7D%20%5CPsi%28t%29%20%3D%20%5Cleft%28%20%5Cfrac%7B%20%5Chat%7Bp%7D%5E2%20%7D%7B2m%7D&plus;%20V%28x%29%20%5Cright%29%20%5CPsi%28t%29"/>
-</p>
+so that: 
 
 </p>
 <img src="https://latex.codecogs.com/gif.latex?i%5Chbar%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20t%7D%20%5CPsi%28t%29%20%3D%20%5Cleft%28%20%5Cfrac%7B%20%5Chat%7Bp%7D%5E2%20%7D%7B2m%7D&plus;%20V%28x%29%20%5Cright%29%20%5CPsi%28t%29"/>
 </p>
 
+so that we have our position operator defined by:
 </p>
 <img src="
 https://latex.codecogs.com/gif.latex?%5Chat%7Bp%7D%7E%3D%7E-i%5Chbar%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20x%7D%7E."/>
 </p>
 
+so that we have our momentum operator defined by:
+
 </p>
 <img src="https://latex.codecogs.com/gif.latex?%5Chat%7Bx%7D%7E%3D%7Ei%5Chbar%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20p%7D%7E%3F"/>
 </p>
-
 
  This version implements a "split-step" Crank-Nicolson method
  We evolve our wave function in the position basis.
