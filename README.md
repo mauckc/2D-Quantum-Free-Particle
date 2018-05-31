@@ -1,14 +1,14 @@
 # 2D-Quantum-Free-Particle
 
-<p align="center">
-  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/media/particle_2D_1.gif"/>
-</p>
-
 This program numerically integrates the Schrodinger equation on finite complex scalar fields for simulating interactions of quantum particles under varied observation.
 
 This version implements a second-order in time finite difference method known as the "split-step" Crank-Nicolson method. By calculating energy states using the hamiltonian in both position and momentum space, this program is able to achieve numerically stable integration, which is necessary for finite difference methods.
 
 Each time-iteration, the program evolves the wave function in the position basis. Then we apply a Fourier transform the wave function to evolve the non-linear term of the Hamiltonian in the momentum basis/phase-space. The waveform is then reverse Fourier transformed back into position space in order to repeat this evolution of the waveform.
+
+<p align="center">
+  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/larger-output-quantum.gif"/>
+</p>
 
 This repository has a wiki page!
 https://github.com/mauckc/2D-Quantum-Free-Particle/wiki
@@ -47,8 +47,10 @@ where:
  Then we fourier transform the wavefunction to evolve it in the momentum basis
  
  <p align="center">
-  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/figures/img1.png" width=640 height=480 />
+  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/media/particle_2D_1.gif"/>
 </p>
+ 
+
  
  data schema:
  
@@ -120,7 +122,6 @@ in the terminal enter the following three commands:
 
 debug:
 if error you may not have specified "sudo" privelages
-
 ___________________________________________________________________
 COMPILING THE C++ SIMULATION CODE
 
@@ -137,3 +138,7 @@ RUN THE COMPILED SIMULATION
 
 OUTPUT SENT TO DIRECTORY "slices"
 Created output will be saved as a ".dat" file in this directory: "2D-Quantum-Free-Particle/slices"
+
+ <p align="center">
+  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/figures/img1.png" width=640 height=480 />
+</p>
