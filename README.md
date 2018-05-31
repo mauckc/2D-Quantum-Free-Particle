@@ -46,10 +46,10 @@ where:
  We evolve our wave function in the position basis.
  Then we fourier transform the wavefunction to evolve it in the momentum basis
  
- <p align="center">
-  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/media/particle_2D_1.gif"/>
+
+  <p align="center">
+  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/figures/img1.png" width=640 height=480 />
 </p>
- 
 
  
  data schema:
@@ -123,6 +123,11 @@ in the terminal enter the following three commands:
 debug:
 if error you may not have specified "sudo" privelages
 ___________________________________________________________________
+
+ <p align="center">
+  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/media/particle_2D_1.gif"/>
+</p>
+
 COMPILING THE C++ SIMULATION CODE
 
 You will then need to specify the linking flags to compile with the
@@ -139,6 +144,6 @@ RUN THE COMPILED SIMULATION
 OUTPUT SENT TO DIRECTORY "slices"
 Created output will be saved as a ".dat" file in this directory: "2D-Quantum-Free-Particle/slices"
 
- <p align="center">
-  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/figures/img1.png" width=640 height=480 />
-</p>
+- Ross Mauck
+
+
