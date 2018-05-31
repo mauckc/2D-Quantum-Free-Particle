@@ -2,16 +2,6 @@
 
 This program numerically integrates the Schrodinger equation on finite complex scalar fields for simulating interactions of quantum particles under varied observation.
 
-This repository has a wiki page!
-https://github.com/mauckc/2D-Quantum-Free-Particle/wiki
-
-and a python visualization sub-repository!
-https://github.com/mauckc/2D-Quantum-Free-Particle/tree/master/visualization
-
-<p align="center">
-<img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/larger-output-quantum.gif"/>
-</p>
-
 ## About 2D Quantum Free Particle
 
 This version implements a second-order in time finite difference method known as the "split-step" Crank-Nicolson method. By calculating energy states using the hamiltonian in both position and momentum space, this program is able to achieve numerically stable integration, which is necessary for finite difference methods.
@@ -22,10 +12,13 @@ Once the momentum space representation has been solved by FFTw we can evolve the
 
 The wavefunction in momentum space is finally reverse Fourier transformed back into position space in order to repeat this integration scheme at the next time step t + dt
 
-### PARTIAL DIFFERNTIAL EQUATION EXAMPLE 
-for wave function in one dimension X
+<p align="center">
+<img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/larger-output-quantum.gif"/>
+</p>
 
- We have a representation free Schrodinger equation:
+### Wave function in one dimension X
+
+We have a representation free Schrodinger equation:
  
 <p align="center">
 <img src="https://latex.codecogs.com/gif.latex?i%5Chbar%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20t%7D%5CPsi%28t%29%3D%20%5Chat%7BH%7D%5CPsi%28t%29"/>
@@ -166,10 +159,6 @@ debug:
 if error you may not have specified "sudo" privelages
 ___________________________________________________________________
 
- <p align="center">
-  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/media/particle_2D_1.gif"/>
-</p>
-
 ## COMPILING THE C++ SIMULATION CODE
 
 You will then need to specify the linking flags to compile with the
@@ -185,6 +174,16 @@ RUN THE COMPILED SIMULATION
 
 OUTPUT SENT TO DIRECTORY "slices"
 Created output will be saved as a ".dat" file in this directory: "2D-Quantum-Free-Particle/slices"
+
+ <p align="center">
+  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/media/particle_2D_1.gif"/>
+</p>
+
+This repository has a wiki page!
+https://github.com/mauckc/2D-Quantum-Free-Particle/wiki
+
+and a python visualization sub-repository!
+https://github.com/mauckc/2D-Quantum-Free-Particle/tree/master/visualization
 
 - Ross Mauck
 
