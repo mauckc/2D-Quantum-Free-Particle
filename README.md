@@ -54,8 +54,8 @@ where:
  
  data schema:
  
-     phi[2][2][N][N]
-     chi[2][2][N][N]
+     phi[2][2][N][N]  this stores the wavefunction in position space 
+     chi[2][2][N][N]  this stores the wavefunction in fourier space
  
      first row: [2] - Used for before and after partial differential equation solving step
      second row: [2] - Real and Imaginary parts of each wave function
