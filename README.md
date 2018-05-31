@@ -73,8 +73,9 @@ so that we have our momentum operator defined by:
 <p align="center">
   <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/figures/img1.png" width=640 height=480 />
 </p>
- _________________________________________________
-## HOW TO MODIFY PROGRAM SPACE AND INITIAL CONDITION
+
+ 
+## Modifying the intial parameters
 
 ### Simulation Structure
  
@@ -86,13 +87,14 @@ so that we have our momentum operator defined by:
      L  - Size of our 2D simulation space in program units
      
 ### Initial Wave Function Conditions 
- phi - position space representation of the wavefunction
- chi - momentum space representation of the wavefunction
- 
- ### data schema:
- 
+
+### Data schema:
+
      phi[2][2][N][N]  this stores the wavefunction in position space 
+     phi - position space representation of the wavefunction
+
      chi[2][2][N][N]  this stores the wavefunction in fourier space
+     chi - momentum space representation of the wavefunction
  
      first row: [2] - Used for before and after partial differential equation solving step
      second row: [2] - Real and Imaginary parts of each wave function
