@@ -9,7 +9,7 @@ and a python visualization sub-repository!
 https://github.com/mauckc/2D-Quantum-Free-Particle/tree/master/visualization
 
 <p align="center">
-<img src="https://latex.codecogs.com/gif.latex?%5Cpsi%28x%29%20%3D%20%5Cpsi_%7B%5Cmathbb%7BR%7D%7D%20%28x%29%20&plus;%20i%20%5Cast%20%5Cpsi_%7B%5Cmathbb%7BI%7D%7D%28x%29"/>
+<img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/larger-output-quantum.gif"/>
 </p>
 
 ## About 2D Quantum Free Particle
