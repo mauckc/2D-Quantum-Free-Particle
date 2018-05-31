@@ -2,10 +2,6 @@
 
 This program numerically integrates the Schrodinger equation on finite complex scalar fields for simulating interactions of quantum particles under varied observation.
 
-<p align="center">
-  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/larger-output-quantum.gif"/>
-</p>
-
 This repository has a wiki page!
 https://github.com/mauckc/2D-Quantum-Free-Particle/wiki
 
@@ -40,25 +36,25 @@ where:
 
  representation-free Schrodinger equation
  
-</p>
+<p align="center">
 <img src="https://latex.codecogs.com/gif.latex?i%5Chbar%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20t%7D%5CPsi%28t%29%3D%20%5Chat%7BH%7D%5CPsi%28t%29"/>
 </p>
 
 we take the separable Hamiltonian:
 
-</p>
+<p align="center">
 <img src="https://latex.codecogs.com/gif.latex?H%3D%5Cfrac%7Bp%5E2%7D%7B2m%7D&plus;V"/>
 </p>
 
 so that: 
 
-</p>
+<p align="center">
 <img src="https://latex.codecogs.com/gif.latex?i%5Chbar%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20t%7D%20%5CPsi%28t%29%20%3D%20%5Cleft%28%20%5Cfrac%7B%20%5Chat%7Bp%7D%5E2%20%7D%7B2m%7D&plus;%20V%28x%29%20%5Cright%29%20%5CPsi%28t%29"/>
 </p>
 
 so that we have our position operator defined by:
 
-</p>
+<p align="center">
 <img src="https://latex.codecogs.com/gif.latex?%5Chat%7Bx%7D%7E%3D%7Ei%5Chbar%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20p%7D%7E%3F"/>
 </p>
 
@@ -73,7 +69,7 @@ so that we have our momentum operator defined by:
  Then we fourier transform the wavefunction to evolve it in the momentum basis
  
 
-  <p align="center">
+<p align="center">
   <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/figures/img1.png" width=640 height=480 />
 </p>
  _________________________________________________
@@ -126,26 +122,26 @@ so that we have our momentum operator defined by:
         phi[0][IM][j][i] = A*sin(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
         
 _____________
-DEPENDENCIES:
+## DEPENDENCIES:
 
 ___________________________________
 LINUX (tested on 16.04 Ubuntu)
 
-OPTION 1: APT-GET PACKAGE MANAGER
+### OPTION 1 LINUX: APT-GET PACKAGE MANAGER
 
 in terminal type: 
 
      sudo apt-get install ffmpeg
 ___________________________________
-MAC OS X (tested on 16.04 Ubuntu)
+MAC OS X 
 
-OPTION 1: HOMEBREW PACKAGE MANAGER
+### OPTION 1 MAC: HOMEBREW PACKAGE MANAGER
 
 in terminal type: 
 
      brew install ffmpeg
 
-OPTION 2:
+### OPTION 2:
 Download latest fftw stable release
 http://www.fftw.org/download.html
 
@@ -168,7 +164,7 @@ ___________________________________________________________________
   <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/media/particle_2D_1.gif"/>
 </p>
 
-COMPILING THE C++ SIMULATION CODE
+## COMPILING THE C++ SIMULATION CODE
 
 You will then need to specify the linking flags to compile with the
 fftw3 library. On Unix systems, link with "-lfftw3 -lm" like in the example below:
