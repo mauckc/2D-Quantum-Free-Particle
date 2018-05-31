@@ -32,10 +32,6 @@ Initial Wave Function Conditions
  phi - Real Part of the wavefunction
  chi - Complex Part of the wavefunction
 
-<p align="center">
-  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/figures/img1.png"/>
-</p>
-
      PARTIAL DIFFERNTIAL EQUATION EXAMPLE FOR WAVEFUNTION IN ONE DIMENSION (X)
 
   <img src="https://latex.codecogs.com/gif.latex?%5Cbg_black%20i%20%28%5Cfrac%7Bd%5Cpsi%7D%7Bdx%7D%29%20%3D%20-%5Cfrac%7B1%7D%7B2%7D%20%28%5Cfrac%7Bd%5Cpsi%7D%7Bdx%7D%29%5E%7B2%7D%20&plus;%20U%28x%29%5Cpsi%28x%29"/>
@@ -49,6 +45,10 @@ where:
  This version implements a "split-step" Crank-Nicolson method
  We evolve our wave function in the position basis.
  Then we fourier transform the wavefunction to evolve it in the momentum basis
+ 
+ <p align="center">
+  <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/figures/img1.png" width=640 height=480 />
+</p>
  
  data schema:
  
