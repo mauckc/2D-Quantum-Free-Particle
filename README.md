@@ -2,11 +2,6 @@
 
 This program numerically integrates the Schrodinger equation on finite complex scalar fields for simulating interactions of quantum particles under varied observation.
 
-
-<img src="https://latex.codecogs.com/gif.latex?%5Cpsi%28x%29%20%3D%20%5Cpsi_%7B%5Cmathbb%7BR%7D%7D%20%28x%29%20&plus;%20i%20%5Cast%20%5Cpsi_%7B%5Cmathbb%7BI%7D%7D%28x%29"/>
-</p>
-
-
 <p align="center">
   <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/larger-output-quantum.gif"/>
 </p>
@@ -17,17 +12,20 @@ https://github.com/mauckc/2D-Quantum-Free-Particle/wiki
 and a python visualization sub-repository!
 https://github.com/mauckc/2D-Quantum-Free-Particle/tree/master/visualization
 
+<img src="https://latex.codecogs.com/gif.latex?%5Cpsi%28x%29%20%3D%20%5Cpsi_%7B%5Cmathbb%7BR%7D%7D%20%28x%29%20&plus;%20i%20%5Cast%20%5Cpsi_%7B%5Cmathbb%7BI%7D%7D%28x%29"/>
+</p>
+
 _________________________________________________
 HOW TO MODIFY PROGRAM SPACE AND INITIAL CONDITION
 
  Simulation Structure
  
-     N - single side length of our N by N array using a standard indexing
-     t - current program time
+     N  - single side length of our N by N array using a standard indexing
+     t  - current program time
      dt - time interval between program time steps
      t0 - intial program time
      tf - final program time ( simulation ends once t = tf
-     L - Size of our 2D simulation space in program units
+     L  - Size of our 2D simulation space in program units
      
 Initial Wave Function Conditions 
  phi - position space representation of the wavefunction
