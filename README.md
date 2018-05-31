@@ -15,7 +15,7 @@ https://github.com/mauckc/2D-Quantum-Free-Particle/tree/master/visualization
 <img src="https://latex.codecogs.com/gif.latex?%5Cpsi%28x%29%20%3D%20%5Cpsi_%7B%5Cmathbb%7BR%7D%7D%20%28x%29%20&plus;%20i%20%5Cast%20%5Cpsi_%7B%5Cmathbb%7BI%7D%7D%28x%29"/>
 </p>
 
-
+## About 2D Quantum Free Particle
 
 This version implements a second-order in time finite difference method known as the "split-step" Crank-Nicolson method. By calculating energy states using the hamiltonian in both position and momentum space, this program is able to achieve numerically stable integration, which is necessary for finite difference methods.
 
@@ -25,7 +25,7 @@ Once the momentum space representation has been solved by FFTw we can evolve the
 
 The wavefunction in momentum space is finally reverse Fourier transformed back into position space in order to repeat this integration scheme at the next time step t + dt
 
-     PARTIAL DIFFERNTIAL EQUATION EXAMPLE FOR WAVEFUNTION IN ONE DIMENSION (X)
+### PARTIAL DIFFERNTIAL EQUATION EXAMPLE FOR WAVEFUNTION IN ONE DIMENSION (X)
 
   <img src="https://latex.codecogs.com/gif.latex?%5Cbg_black%20i%20%28%5Cfrac%7Bd%5Cpsi%7D%7Bdx%7D%29%20%3D%20-%5Cfrac%7B1%7D%7B2%7D%20%28%5Cfrac%7Bd%5Cpsi%7D%7Bdx%7D%29%5E%7B2%7D%20&plus;%20U%28x%29%5Cpsi%28x%29"/>
 </p>
@@ -62,7 +62,7 @@ so that we have our position operator defined by:
 
 so that we have our momentum operator defined by:
 
-</p>
+<p align="center">
 <img src="https://latex.codecogs.com/gif.latex?%5Chat%7Bp%7D%7E%3D%7E-i%5Chbar%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20x%7D%7E."/>
 </p>
 
@@ -90,7 +90,7 @@ so that we have our momentum operator defined by:
  phi - position space representation of the wavefunction
  chi - momentum space representation of the wavefunction
  
- data schema:
+ ### data schema:
  
      phi[2][2][N][N]  this stores the wavefunction in position space 
      chi[2][2][N][N]  this stores the wavefunction in fourier space
@@ -100,13 +100,13 @@ so that we have our momentum operator defined by:
      third row: [N] - X dimension of our 2D simulation space
      fourth row: [N] - Y dimension of our 2D simulation space
  
-  Variables for keeping track of total energy stored in the simualtion.
+  ### Variables for keeping track of total energy stored in the simualtion.
   
       realsum += psi[0][RE][index];
       complexsum += psi[0][IM][index];
       probabilitysum += psi[0][RE][index] * psi[0][RE][index] + psi[0][IM][index] * psi[0][IM][index];
                   
- Gaussian Distribution in 2D
+ ### Gaussian Distribution in 2D
         
         sigma = ~0.7
         y = (j*dx) - (L/2.0);
@@ -115,13 +115,13 @@ so that we have our momentum operator defined by:
         ky = 10.0*3.141592/L;
         A  = AMPLITUDE;
         
-  Sets gaussian real part of psi
+  Sets gaussian real part of psi:
         
-        psi[0][RE][j][i] = A*cos(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
+        phi[0][RE][j][i] = A*cos(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
         
-  Sets gaussian for the imaginary parts of psi
+  Sets gaussian for the imaginary parts of psi:
   
-        psi[0][IM][j][i] = A*sin(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
+        phi[0][IM][j][i] = A*sin(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
         
 _____________
 DEPENDENCIES:
