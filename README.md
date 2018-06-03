@@ -77,55 +77,7 @@ We are able to achieve a much higher level of accuracy by spliting our integrati
 </p>
 
  
-## Modifying the intial parameters
 
-### Simulation Structure
- 
-     N  - single side length of our N by N array using a standard indexing
-     t  - current program time
-     dt - time interval between program time steps
-     t0 - intial program time
-     tf - final program time ( simulation ends once t = tf
-     L  - Size of our 2D simulation space in program units
-     
-### Initial Wave Function Conditions 
-
-### Data schema:
-
-     phi[2][2][N][N]  this stores the wavefunction in position space 
-     phi - position space representation of the wavefunction
-
-     chi[2][2][N][N]  this stores the wavefunction in fourier space
-     chi - momentum space representation of the wavefunction
- 
-     first row: [2] - Used for before and after partial differential equation solving step
-     second row: [2] - Real and Imaginary parts of each wave function
-     third row: [N] - X dimension of our 2D simulation space
-     fourth row: [N] - Y dimension of our 2D simulation space
- 
-  ### Variables for keeping track of total energy stored in the simualtion.
-  
-      realsum += psi[0][RE][index];
-      complexsum += psi[0][IM][index];
-      probabilitysum += psi[0][RE][index] * psi[0][RE][index] + psi[0][IM][index] * psi[0][IM][index];
-                  
- ### Gaussian Distribution in 2D
-        
-        sigma = ~0.7
-        y = (j*dx) - (L/2.0);
-        x = (i*dx) - (L/2.0);
-        kx = 1.0*3.141592/L;
-        ky = 10.0*3.141592/L;
-        A  = AMPLITUDE;
-        
-  Sets gaussian real part of psi:
-        
-        phi[0][RE][j][i] = A*cos(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
-        
-  Sets gaussian for the imaginary parts of psi:
-  
-        phi[0][IM][j][i] = A*sin(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
-        
 _____________
 ## DEPENDENCIES:
 
@@ -184,6 +136,56 @@ Created output will be saved as a ".dat" file in this directory: "2D-Quantum-Fre
  <p align="center">
   <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/media/particle_2D_1.gif"/>
 </p>
+
+## Modifying the intial parameters
+
+### Simulation Structure
+ 
+     N  - single side length of our N by N array using a standard indexing
+     t  - current program time
+     dt - time interval between program time steps
+     t0 - intial program time
+     tf - final program time ( simulation ends once t = tf
+     L  - Size of our 2D simulation space in program units
+     
+### Initial Wave Function Conditions 
+
+### Data schema:
+
+     phi[2][2][N][N]  this stores the wavefunction in position space 
+     phi - position space representation of the wavefunction
+
+     chi[2][2][N][N]  this stores the wavefunction in fourier space
+     chi - momentum space representation of the wavefunction
+ 
+     first row: [2] - Used for before and after partial differential equation solving step
+     second row: [2] - Real and Imaginary parts of each wave function
+     third row: [N] - X dimension of our 2D simulation space
+     fourth row: [N] - Y dimension of our 2D simulation space
+ 
+  ### Variables for keeping track of total energy stored in the simualtion.
+  
+      realsum += psi[0][RE][index];
+      complexsum += psi[0][IM][index];
+      probabilitysum += psi[0][RE][index] * psi[0][RE][index] + psi[0][IM][index] * psi[0][IM][index];
+                  
+ ### Gaussian Distribution in 2D
+        
+        sigma = ~0.7
+        y = (j*dx) - (L/2.0);
+        x = (i*dx) - (L/2.0);
+        kx = 1.0*3.141592/L;
+        ky = 10.0*3.141592/L;
+        A  = AMPLITUDE;
+        
+  Sets gaussian real part of psi:
+        
+        phi[0][RE][j][i] = A*cos(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
+        
+  Sets gaussian for the imaginary parts of psi:
+  
+        phi[0][IM][j][i] = A*sin(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
+        
 
 This repository has a wiki page!
 https://github.com/mauckc/2D-Quantum-Free-Particle/wiki
