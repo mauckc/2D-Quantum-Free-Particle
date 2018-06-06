@@ -178,9 +178,9 @@ if __name__ == '__main__':
 
         # update field in momentum space
         for i in range(N):
-            px = ((2*math.pi)/L) * (((i + (N/2)) % N) - N/2)
+            px = ((2*math.pi)/L) * (((i + (N/2)) / N) - N/2)
             for j in range(N):
-                py = ((2*math.pi)/L) * (((j + (N/2)) % N) - N/2)
+                py = ((2*math.pi)/L) * (((j + (N/2)) / N) - N/2)
                 chi[1][real][i][j] = chi[0][imag][i][j] * math.sin((dt*(px*px+py*py))/2) + chi[0][real][i][j] * math.cos((dt*(px*px+py*py))/2)
                 chi[1][imag][i][j] = chi[0][imag][i][j] * math.cos((dt*(px*px+py*py))/2) - chi[0][real][i][j] * math.sin((dt*(px*px+py*py))/2)
 
@@ -196,22 +196,12 @@ if __name__ == '__main__':
                 psi[0][real][i][j] = backwardout[i,j].real
                 psi[0][imag][i][j] = backwardout[i,j].imag
 
-
-        '''# repetitive but needed to switch back and forth between fields without pyfftw
-        for i in range(N):
-            y = (i*dx - (L/2))
-            for j in range(N):
-                x = (j*dx - (L/2))
-                psi[0][real][i][j] = psi[1][real][i][j] * math.cos(potential(x) * dt) + psi[1][imag][i][j] * math.sin(potential(x)*dt)
-                psi[0][imag][i][j] = psi[1][imag][i][j] * math.cos(potential(x) * dt) + psi[1][real][i][j] * math.sin(potential(x)*dt)
-
-        '''
-
+        # piq
         if num % 10 is 0:
             phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
             plt.imshow(phi,cmap='hot',interpolation='nearest')
             plt.show()
-            print("printing field number ")
+            print("\n printing field number ")
             print( num )
             print( " at time: ")
             print(t)
