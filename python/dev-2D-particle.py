@@ -2,7 +2,7 @@
 #
 #
 #
-# Attempting to port my program to python
+# Attempting to implement schrodinger solver runge kutta method:
 #
 
 from __future__ import print_function
@@ -62,8 +62,8 @@ if __name__ == '__main__':
     #ar = [x,y,z]
     #print(ar)
     # define initial parameters
-    N = 128 # number of evenly spaced points
-    L = 5.0 # Length of the box ( box is simulation space in world coordinates )
+    N = 256 # number of evenly spaced points
+    L = 20.0 # Length of the box ( box is simulation space in world coordinates )
     dt = 0.01 # Time-step
     t0 = 0.0 # Initial time
     tf = 5.0 # final time
@@ -173,8 +173,8 @@ if __name__ == '__main__':
         print(np.shape(forwardout))
         for i in range(N):
             for j in range(N):
-                chi[0][real][i][j] = forwardout[i,j][0]
-                chi[0][imag][i][j] = forwardout[i,j][1]
+                chi[0][real][i][j] = forwardout[i,j].real
+                chi[0][imag][i][j] = forwardout[i,j].imag
 
         # update field in momentum space
         for i in range(N):
@@ -193,8 +193,8 @@ if __name__ == '__main__':
         backwardout = pyfftw.interfaces.numpy_fft.fft(backwardin)
         for i in range(N):
             for j in range(N):
-                psi[0][real][i][j] = backwardout[i,j][0]
-                psi[0][imag][i][j] = backwardout[i,j][1]
+                psi[0][real][i][j] = backwardout[i,j].real
+                psi[0][imag][i][j] = backwardout[i,j].imag
 
 
         '''# repetitive but needed to switch back and forth between fields without pyfftw
@@ -208,13 +208,15 @@ if __name__ == '__main__':
         '''
 
         if num % 10 is 0:
+            phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
+            plt.imshow(phi,cmap='hot',interpolation='nearest')
+            plt.show()
             print("printing field number ")
             print( num )
             print( " at time: ")
             print(t)
         num += 1
         t = t + dt
-
-    # begin time evolution
+    # when simulation has reached time final
     plt.imshow(phi,cmap='hot',interpolation='nearest')
     plt.show()
