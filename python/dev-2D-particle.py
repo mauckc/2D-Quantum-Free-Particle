@@ -1,8 +1,5 @@
 #
-#
-#
-#
-# Attempting to implement schrodinger solver runge kutta method:
+# Python Implementation of 2D-Quantum-Free-Particle schrodinger solver split step method:
 #
 
 from __future__ import print_function
