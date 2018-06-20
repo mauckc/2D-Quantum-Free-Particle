@@ -169,11 +169,11 @@ Created output will be saved as a ".dat" file in this directory: "2D-Quantum-Fre
      ```
      
   ### Variables for keeping track of total energy stored in the simualtion.
-      ```c++
+  ```c++
       realsum += psi[0][RE][index];
       complexsum += psi[0][IM][index];
       probabilitysum += psi[0][RE][index] * psi[0][RE][index] + psi[0][IM][index] * psi[0][IM][index];
-      ```        
+  ```        
  ### Gaussian Distribution in 2D
         ```c++
         sigma = ~0.7
