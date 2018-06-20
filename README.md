@@ -258,7 +258,6 @@ Unload the output of our fourier transform to chi array where momentum space wav
 ```c++
             for (int j = 0; j < N-1; j++){
                 for (int i = 0; i < N; i++){
-
                     chi[0][RE][j][i] = out[i+j*N][0];
                     chi[0][IM][j][i] = out[i+j*N][1];
                 }
@@ -271,11 +270,9 @@ Update the momentum space representation of our wavefunction
         for (int j = 0; j < N-1; j++)
         {
             py = ((2*3.145926535)/L) * (( (j + (N/2)) % N) - N/2);
-            
             for (int i = 0; i < N; i++)//here we update the phases in momentum space
             {
                 px = ((2*3.145926535)/L) * (( (i + (N/2)) % N) - N/2);
-
                 chi[1][RE][j][i] = chi[0][IM][j][i]*sin((dt*(px*px+py*py))/2) + chi[0][RE][j][i]*cos((dt*(px*px+py*py))/2);
                 chi[1][IM][j][i] = chi[0][IM][j][i]*cos((dt*(px*px+py*py))/2) - chi[0][RE][j][i]*sin((dt*(px*px+py*py))/2);
             }
@@ -345,12 +342,10 @@ void outputfield(int first)//outputs the field values
 {
     static FILE *slicefield;
     static char name[500];
-
     sprintf(name,"./slices/slices_fields_%d.dat", first);
     slicefield=fopen(name,"w");
-
     double psiprob[N][N];
-
+    
     for (int j = 0; j < N; j++)
     {
         for ( int i = 0 ; i < N; i++)
