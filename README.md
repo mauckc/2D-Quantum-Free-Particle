@@ -215,8 +215,8 @@ out2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N * N);
 plan2 = fftw_plan_dft_2d(N, N, in2, out2, FFTW_BACKWARD, FFTW_ESTIMATE);
 ```
 ## Time Evolution
+time evolution begins at t0 and iterates by time-step dt until current time reaches final time tf
 ```c++   
-    //time evolution begins
     while (t<tf)
 ```
 
@@ -225,15 +225,12 @@ Update wavefunction in position space
 
 ```c++    
     {
-
         for (int j = 0; j < N; j++){
             y = (j*dx - (L/2));
             for (int i = 0; i < N; i++){//update phase of position space wavefunction
                 x = (i*dx - (L/2));
-
                 psi[1][RE][j][i] = psi[0][RE][j][i] * cos(potential(x) * dt) + psi[0][IM][j][i]*sin(potential(x) * dt);
                 psi[1][IM][j][i] = psi[0][IM][j][i] * cos(potential(x) * dt) - psi[0][RE][j][i]*sin(potential(x) * dt);
-
             }
         }
 ```
@@ -246,18 +243,16 @@ Load the FFtw arrays for Real and Complex parts of the wavefunction
 ```c++    
         for (int j = 0; j < N-1; j++){
             for (int i = 0; i < N; i++){  //load our FFTw array
-
-            in[i+j*N][0] = psi[1][RE][j][i];
-            in[i+j*N][1] = psi[1][IM][j][i];
-
+                in[i+j*N][0] = psi[1][RE][j][i];
+                in[i+j*N][1] = psi[1][IM][j][i];
             }
         }
 ```
-Execute the plan
+Execute the plan:
+This loop puts the transformed array in DFT output
 ```c++
         fftw_execute(plan);//transform now stored in out in FFTw format
-        //this loop puts the transformed array in DFT output
-```
+```       
 Unload the output of our fourier transform to chi array where momentum space wavefunction is defined
 
 ```c++
@@ -268,7 +263,6 @@ Unload the output of our fourier transform to chi array where momentum space wav
                     chi[0][IM][j][i] = out[i+j*N][1];
                 }
             }
-
 ```
 
 ### Momentum Space Update
@@ -277,7 +271,7 @@ Update the momentum space representation of our wavefunction
         for (int j = 0; j < N-1; j++)
         {
             py = ((2*3.145926535)/L) * (( (j + (N/2)) % N) - N/2);
-
+            
             for (int i = 0; i < N; i++)//here we update the phases in momentum space
             {
                 px = ((2*3.145926535)/L) * (( (i + (N/2)) % N) - N/2);
@@ -292,11 +286,10 @@ Update our position space representation of our wavefunction
 
 Load the FFtw arrays for Real and Complex parts of the wavefunction
 ```c++
-for (int j = 0; j < N-1; j++){
+        for (int j = 0; j < N-1; j++){
             for (int i = 0; i < N; i++){
-                //load our FFTw array
-            in2[i+j*N][0] = chi[1][RE][j][i];
-            in2[i+j*N][1] = chi[1][IM][j][i];
+                in2[i+j*N][0] = chi[1][RE][j][i];
+                in2[i+j*N][1] = chi[1][IM][j][i];
             }
         }
 ```
@@ -307,13 +300,11 @@ Excute Bacwards Plan
 
 Update the position space representation of the wavefunction
 ```c++
-
             for (int j = 0; j < N-1; j++){
                 for (int i = 0; i < N; i++){
-                        //this loop puts the transformed array in DFT output
-
-            psi[0][RE][j][i] = out2[i+j*N][0];
-            psi[0][IM][j][i] = out2[i+j*N][1];
+                    //this loop puts the transformed array in DFT output
+                    psi[0][RE][j][i] = out2[i+j*N][0];
+                    psi[0][IM][j][i] = out2[i+j*N][1];
                 }
             }
 ```
@@ -322,10 +313,9 @@ Update the position space representation of the wavefunction
 this loop accounts for unnormalized DFT after forward and backward transforms
 ```c++
             for (int j = 0; j < N; j++){
-                for (int i = 0; i < N; i++){  //load our FFTw array
-
-            psi[0][RE][j][i] = psi[0][RE][j][i]/(N*N);
-            psi[0][IM][j][i] = psi[0][IM][j][i]/(N*N);
+                for (int i = 0; i < N; i++){
+                    psi[0][RE][j][i] = psi[0][RE][j][i]/(N*N);
+                    psi[0][IM][j][i] = psi[0][IM][j][i]/(N*N);
                 }
             }
 ```
@@ -345,7 +335,6 @@ Update our time and generation interators
             outputfield(slicenum);
             //outputenergy(slicenum);
             slicenum++;
-
         }
 ```
 where:
@@ -366,27 +355,22 @@ void outputfield(int first)//outputs the field values
     {
         for ( int i = 0 ; i < N; i++)
         {
-
-        psiprob[j][i] = psi[0][RE][j][i] * psi[0][RE][j][i] + psi[0][IM][j][i] * psi[0][IM][j][i];
-
+            psiprob[j][i] = psi[0][RE][j][i] * psi[0][RE][j][i] + psi[0][IM][j][i] * psi[0][IM][j][i];
         }
     }
-
     for (int j = 0; j < N; j++)
     {
       for (int i = 0; i < N; i++)
       {
           if (i%desample==0){
-          fprintf(slicefield,"%d  %d  %lf  %lf  %lf", i , j, psi[0][RE][j][i], psi[0][IM][j][i], psiprob[j][i]);
-          fprintf(slicefield,"\n");
+              fprintf(slicefield,"%d  %d  %lf  %lf  %lf", i , j, psi[0][RE][j][i], psi[0][IM][j][i], psiprob[j][i]);
+              fprintf(slicefield,"\n");
           }
         }
      }
-
     fclose(slicefield);
 }
 ```
-
 
 This repository has a wiki page!
 https://github.com/mauckc/2D-Quantum-Free-Particle/wiki
