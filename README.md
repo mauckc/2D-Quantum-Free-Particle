@@ -330,7 +330,7 @@ this loop accounts for unnormalized DFT after forward and backward transforms
             }
 ```
 
-### Update
+### Update & Repeat
 Update our time and generation interators
 ```c++
         t += dt;
