@@ -124,11 +124,15 @@ fftw3 library. On Unix systems, link with "-lfftw3 -lm" like in the example belo
 
 ENTER THIS IN THE MAIN DIRECTORY "2D-Quantum-Free-Particle/":
 
-      g++ 2Dparticle.cpp -o 2Dparticle -lfftw3 -lm
+```bash
+g++ 2Dparticle.cpp -o 2Dparticle -lfftw3 -lm
+```
 
 RUN THE COMPILED SIMULATION
 
-      ./2Dparticle
+```c++
+./2Dparticle
+```
 
 OUTPUT SENT TO DIRECTORY "slices"
 Created output will be saved as a ".dat" file in this directory: "2D-Quantum-Free-Particle/slices"
@@ -140,18 +144,18 @@ Created output will be saved as a ".dat" file in this directory: "2D-Quantum-Fre
 ## Modifying the intial parameters
 
 ### Simulation Structure
- 
+     ```c++
      N  - single side length of our N by N array using a standard indexing
      t  - current program time
      dt - time interval between program time steps
      t0 - intial program time
      tf - final program time ( simulation ends once t = tf
      L  - Size of our 2D simulation space in program units
-     
+     ```
 ### Initial Wave Function Conditions 
 
 ### Data schema:
-
+     ```c++
      phi[2][2][N][N]  this stores the wavefunction in position space 
      phi - position space representation of the wavefunction
 
@@ -162,30 +166,32 @@ Created output will be saved as a ".dat" file in this directory: "2D-Quantum-Fre
      second row: [2] - Real and Imaginary parts of each wave function
      third row: [N] - X dimension of our 2D simulation space
      fourth row: [N] - Y dimension of our 2D simulation space
- 
+     ```
+     
   ### Variables for keeping track of total energy stored in the simualtion.
-  
+      ```c++
       realsum += psi[0][RE][index];
       complexsum += psi[0][IM][index];
       probabilitysum += psi[0][RE][index] * psi[0][RE][index] + psi[0][IM][index] * psi[0][IM][index];
-                  
+      ```        
  ### Gaussian Distribution in 2D
-        
+        ```c++
         sigma = ~0.7
         y = (j*dx) - (L/2.0);
         x = (i*dx) - (L/2.0);
         kx = 1.0*3.141592/L;
         ky = 10.0*3.141592/L;
         A  = AMPLITUDE;
-        
+        ```
   Sets gaussian real part of psi:
-        
+       ```c++ 
         phi[0][RE][j][i] = A*cos(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
-        
+        ```
   Sets gaussian for the imaginary parts of psi:
+  ```c++
+  phi[0][IM][j][i] = A*sin(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
+  ```
   
-        phi[0][IM][j][i] = A*sin(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
-
 ### Output
 
 Output function save file in ".dat" format
