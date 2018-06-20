@@ -185,7 +185,47 @@ Created output will be saved as a ".dat" file in this directory: "2D-Quantum-Fre
   Sets gaussian for the imaginary parts of psi:
   
         phi[0][IM][j][i] = A*sin(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
-        
+
+### Output
+
+Output function save file in ".dat" format
+
+```c++
+void outputfield(int first)//outputs the field values
+{
+    static FILE *slicefield;
+    static char name[500];
+
+    sprintf(name,"./slices/slices_fields_%d.dat", first);
+    slicefield=fopen(name,"w");
+
+    double psiprob[N][N];
+
+    for (int j = 0; j < N; j++)
+    {
+        for ( int i = 0 ; i < N; i++)
+        {
+
+        psiprob[j][i] = psi[0][RE][j][i] * psi[0][RE][j][i] + psi[0][IM][j][i] * psi[0][IM][j][i];
+
+        }
+    }
+
+    for (int j = 0; j < N; j++)
+    {
+      for (int i = 0; i < N; i++)
+      {
+          if (i%desample==0){
+          fprintf(slicefield,"%d  %d  %lf  %lf  %lf", i , j, psi[0][RE][j][i], psi[0][IM][j][i], psiprob[j][i]);
+          fprintf(slicefield,"\n");
+          }
+        }
+     }
+
+    fclose(slicefield);
+}
+```
+
 
 This repository has a wiki page!
 https://github.com/mauckc/2D-Quantum-Free-Particle/wiki
