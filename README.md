@@ -199,9 +199,156 @@ Wave function is stored on in multi-dimensional arrays where phi and chi represe
 ```c++
   phi[0][IM][j][i] = A*sin(kx*x+ky*y) * exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)));
 ```
-  
-### Output
 
+### Setting Up Fourier Plans
+Create both backward and forward fftw plans to be used to time evolve our wavefunction
+
+```c++
+//Forward DFT
+in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N * N);
+out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N * N);
+plan = fftw_plan_dft_2d(N, N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+
+//Backward DFT
+in2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N * N);
+out2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N * N);
+plan2 = fftw_plan_dft_2d(N, N, in2, out2, FFTW_BACKWARD, FFTW_ESTIMATE);
+```
+## Time Evolution
+```c++   
+    //time evolution begins
+    while (t<tf)
+```
+
+### Position Space Update
+Update wavefunction in position space
+
+```c++    
+    {
+
+        for (int j = 0; j < N; j++){
+            y = (j*dx - (L/2));
+            for (int i = 0; i < N; i++){//update phase of position space wavefunction
+                x = (i*dx - (L/2));
+
+                psi[1][RE][j][i] = psi[0][RE][j][i] * cos(potential(x) * dt) + psi[0][IM][j][i]*sin(potential(x) * dt);
+                psi[1][IM][j][i] = psi[0][IM][j][i] * cos(potential(x) * dt) - psi[0][RE][j][i]*sin(potential(x) * dt);
+
+            }
+        }
+```
+
+### Forward Fourier Transform 
+Update the momentum space representation of the wavefunction
+Position Space to momentum space
+
+Load the FFtw arrays for Real and Complex parts of the wavefunction
+```c++    
+        for (int j = 0; j < N-1; j++){
+            for (int i = 0; i < N; i++){  //load our FFTw array
+
+            in[i+j*N][0] = psi[1][RE][j][i];
+            in[i+j*N][1] = psi[1][IM][j][i];
+
+            }
+        }
+```
+Execute the plan
+```c++
+        fftw_execute(plan);//transform now stored in out in FFTw format
+        //this loop puts the transformed array in DFT output
+```
+Unload the output of our fourier transform to chi array where momentum space wavefunction is defined
+
+```c++
+            for (int j = 0; j < N-1; j++){
+                for (int i = 0; i < N; i++){
+
+                    chi[0][RE][j][i] = out[i+j*N][0];
+                    chi[0][IM][j][i] = out[i+j*N][1];
+                }
+            }
+
+```
+
+### Momentum Space Update
+Update the momentum space representation of our wavefunction
+```c++    
+        for (int j = 0; j < N-1; j++)
+        {
+            py = ((2*3.145926535)/L) * (( (j + (N/2)) % N) - N/2);
+
+            for (int i = 0; i < N; i++)//here we update the phases in momentum space
+            {
+                px = ((2*3.145926535)/L) * (( (i + (N/2)) % N) - N/2);
+
+                chi[1][RE][j][i] = chi[0][IM][j][i]*sin((dt*(px*px+py*py))/2) + chi[0][RE][j][i]*cos((dt*(px*px+py*py))/2);
+                chi[1][IM][j][i] = chi[0][IM][j][i]*cos((dt*(px*px+py*py))/2) - chi[0][RE][j][i]*sin((dt*(px*px+py*py))/2);
+            }
+```
+
+### Backwards Fourier Transform
+Update our position space representation of our wavefunction
+
+Load the FFtw arrays for Real and Complex parts of the wavefunction
+```c++
+for (int j = 0; j < N-1; j++){
+            for (int i = 0; i < N; i++){
+                //load our FFTw array
+            in2[i+j*N][0] = chi[1][RE][j][i];
+            in2[i+j*N][1] = chi[1][IM][j][i];
+            }
+        }
+```
+Excute Bacwards Plan
+```c++
+        fftw_execute(plan2);
+```
+
+Update the position space representation of the wavefunction
+```c++
+
+            for (int j = 0; j < N-1; j++){
+                for (int i = 0; i < N; i++){
+                        //this loop puts the transformed array in DFT output
+
+            psi[0][RE][j][i] = out2[i+j*N][0];
+            psi[0][IM][j][i] = out2[i+j*N][1];
+                }
+            }
+```
+
+#### Normalize
+this loop accounts for unnormalized DFT after forward and backward transforms
+```c++
+            for (int j = 0; j < N; j++){
+                for (int i = 0; i < N; i++){  //load our FFTw array
+
+            psi[0][RE][j][i] = psi[0][RE][j][i]/(N*N);
+            psi[0][IM][j][i] = psi[0][IM][j][i]/(N*N);
+                }
+            }
+```
+
+### Update
+Update our time and generation interators
+```c++
+        t += dt;
+        num++;
+        printf("*** program time: %lf \n",t);
+```
+
+### Output
+```c++
+        if (num % div == 0)
+        {
+            outputfield(slicenum);
+            //outputenergy(slicenum);
+            slicenum++;
+
+        }
+```
+where:
 Output function save file in ".dat" format
 
 ```c++
