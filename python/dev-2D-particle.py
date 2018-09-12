@@ -139,7 +139,7 @@ if __name__ == '__main__':
             phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
     print("Initial Conditions Set..")
 
-    print(phi)
+    #print(phi)
 
     # begin time evolution
     plt.imshow(phi,cmap='hot',interpolation='nearest')
@@ -166,7 +166,7 @@ if __name__ == '__main__':
         # perform the transform
         forwardout = pyfftw.interfaces.numpy_fft.fft(forwardin)
 
-        print(forwardout)
+        #print(forwardout)
         print(np.shape(forwardout))
         for i in range(N):
             for j in range(N):
