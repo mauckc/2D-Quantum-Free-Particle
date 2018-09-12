@@ -61,7 +61,7 @@ if __name__ == '__main__':
     # define initial parameters
     N = 256 # number of evenly spaced points
     L = 20.0 # Length of the box ( box is simulation space in world coordinates )
-    dt = 0.01 # Time-step
+    dt = 0.5 # Time-step
     t0 = 0.0 # Initial time
     tf = 5.0 # final time
     dx = L/N # distance between points in program dimensions
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     for i in range(N):
         y = (i * dx) - (L/3.8)
         for j in range(N):
-            x = (i*dx) - (L/3.8)
+            x = (j*dx) - (L/3.8)
             kx = ((20.0 * math.pi) / L)
             ky = ((4.0 * math.pi) / L)
             A = amplitude
@@ -181,12 +181,12 @@ if __name__ == '__main__':
                 chi[1][real][i][j] = chi[0][imag][i][j] * math.sin((dt*(px*px+py*py))/2) + chi[0][real][i][j] * math.cos((dt*(px*px+py*py))/2)
                 chi[1][imag][i][j] = chi[0][imag][i][j] * math.cos((dt*(px*px+py*py))/2) - chi[0][real][i][j] * math.sin((dt*(px*px+py*py))/2)
 
+        # This could be prettified using list comprehensions?
         for i in range(N):
             for j in range(N):
                 backwardin[i,j] = chi[1][real][i][j] + 1j*chi[1][imag][i][j]
 
         # switch back to position spaces
-
         backwardout = pyfftw.interfaces.numpy_fft.fft(backwardin)
         for i in range(N):
             for j in range(N):
