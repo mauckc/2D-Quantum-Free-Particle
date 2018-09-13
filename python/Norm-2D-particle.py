@@ -1,6 +1,6 @@
 #
 # Python Implementation of 2D-Quantum-Free-Particle schrodinger solver split step method:
-#
+# This is the version that normalized the field once at every time step
 
 from __future__ import print_function
 import numpy as np
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     #ar = [x,y,z]
     #print(ar)
     # define initial parameters
-    N = 128 # number of evenly spaced points
+    N = 256 # number of evenly spaced points
     L = 40.0 # Length of the box ( box is simulation space in world coordinates )
     dt = 0.01 # Time-step
     t0 = 0.0 # Initial time
@@ -234,7 +234,7 @@ if __name__ == '__main__':
             plt.savefig('outfields/field%04d.png' % outnum)
             #plt.show()
 
-            print("\nprinting field number "+str(num)+" output number"+str(outnum))
+            print("\nprinting field number "+str(num)+" output number "+str(outnum))
             print( "at time: "+str(t))
             outnum += 1
         num += 1
