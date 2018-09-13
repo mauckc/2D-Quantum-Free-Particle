@@ -8,6 +8,12 @@ import math
 import matplotlib.pyplot as plt
 #import seaborn as sns
 import pyfftw
+import os
+
+directory = "outfields"
+
+if not os.path.exists(directory):
+    os.makedirs(directory)
 
 def calcsum(field):
     total = 0.0
