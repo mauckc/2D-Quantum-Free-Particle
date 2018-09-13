@@ -40,10 +40,11 @@ def max1(input):
 def xnormed(x):
     return  x / x.max()
 
-def calcPsiProbability(phi, chi):
+def calcPsiProbability(psi):
+    psiprob = np.zeros((N,N))
     for i in range(N):
         for j in range(N):
-            psiprob[i,j] = psi[0][real][j][i] * psi[0][real][j][i] + psi[0][imag][j][i] * psi[0][imag][j][i]
+            psiprob[j,i] = psi[0][0][j][i] * psi[0][0][j][i] + psi[0][1][j][i] * psi[0][1][j][i]
     return psiprob
 
 def checksum(sumvar, n):
@@ -60,7 +61,7 @@ def potential(x):
 
 def yxpotential(y,x):
     U = 10.0
-    return U * (((0.5 - math.pow(math.cos(6*3.141592*(0.65*x-L/2)/L)/2,2.0)) + (0.5 - math.pow(math.cos(6*3.141592*(0.65*y-L/2)/L)/2,2.0)))/2) + x; # + x adds gradient in x direction
+    return U * (((0.5 - math.pow(math.cos(6*3.141592*(0.65*x-L/2)/L)/2,2.0)) + (0.5 - math.pow(math.cos(6*3.141592*(0.65*y-L/2)/L)/2,2.0)))/2) + x + y; # + x adds gradient in x direction
 
 if __name__ == '__main__':
     #x = int(raw_input())
@@ -69,16 +70,16 @@ if __name__ == '__main__':
     #n = int(raw_input())
 
     # define initial parameters
-    N = 128 # number of evenly spaced points
-    L = 40.0 # Length of the box ( box is simulation space in world coordinates )
+    N = 256 # number of evenly spaced points
+    L = 80.0 # Length of the box ( box is simulation space in world coordinates )
     dt = 0.005 # Time-step
     t0 = 0.0 # Initial time
-    tf = 3.0 # final time
+    tf = 2.0 # final time
     dx = L/N # distance between points in program dimensions
     t = 0.0
     desample = 8 # desampling factor for output after calculation
     # amplitude for initial potential settings
-    amplitude = 2.0
+    amplitude = 1.0
     A = amplitude
     # fill in the rest of the initial settings
     # sigma of gaussian
@@ -115,8 +116,8 @@ if __name__ == '__main__':
         y = (i * dx) - (L/3.8) # or 3.8
         for j in range(N):
             x = (j*dx) - (L/3.8) # or 3.8
-            kx = ((1000.7 * math.pi) / L)
-            ky = ((10.0 * math.pi) / L)
+            kx = ((0.7 * math.pi) / L)
+            ky = ((1.0 * math.pi) / L)
             A = amplitude
 
             # set the gaussian fields in position space
@@ -156,7 +157,7 @@ if __name__ == '__main__':
         forwardout = pyfftw.interfaces.numpy_fft.fft(forwardin)
 
         #print(forwardout)
-        print(np.shape(forwardout))
+        #print(np.shape(forwardout))
         for i in range(N):
             for j in range(N):
                 chi[0][real][i][j] = forwardout[i,j].real
@@ -188,23 +189,25 @@ if __name__ == '__main__':
         psi[0][real] = xnormed(psi[0][real])
         psi[0][imag] = xnormed(psi[0][imag])
 
-        for i in range(N):
-            for j in range(N):
-                phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
+        # for i in range(N):
+        #     for j in range(N):
+        #         phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
+
+        phi = calcPsiProbability(psi)
         # normalize phi
         #phi = xnormed(phi)
 
         print("Phi sum:"+str(calcsum(phi)))
         print("Phi sum1:"+str(sum1(phi)))
         print("Phi max:"+str(max1(phi)))
-        print("Phi avg:"+str(calcavg(phi)))
+        print("Phi avg:"+str(calcavg(phi))+"\n")
         if num % desample is 0:
             #phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
             plt.imshow(phi,cmap='hot',interpolation='nearest')
             plt.savefig('outfields/field%04d.png' % outnum)
             #plt.show()
 
-            print("\nprinting field number "+str(num)+" output number "+str(outnum))
+            print("printing field number "+str(num)+" output number "+str(outnum))
             print( "at time: "+str(t))
             outnum += 1
         num += 1
@@ -214,6 +217,6 @@ if __name__ == '__main__':
     #plt.imshow(phi,cmap='hot',interpolation='nearest')
     #plt.show()
     outdt = str(dt).translate(None, string.punctuation)
-    returncode = subprocess.call(['ffmpeg','-r','30','-f','image2','-s','640x480','-i','outfields/field%'+'04d.png','-vcodec','libx264','-crf','25','-pix_fmt','yuv420p','fields_out_%d_%d_%s_%d.mp4' % (N,math.floor(L),outdt,desample)])
+    returncode = subprocess.call(['ffmpeg','-r','30','-f','image2','-s','640x480','-i','outfields/field%'+'04d.png','-vcodec','libx264','-crf','25','-pix_fmt','yuv420p','fields_out_N%d_L%d_dt%s_dsmp%d_tf%d_sigma%d.mp4' % (N,math.floor(L),outdt,desample, math.floor(tf), math.floor(sigma))])
     print('returncode:', returncode)
     # call(["./argpngs2mp4.sh %s %s %s %s " % (str(N),str(round(L,1)),str(round(dt,3)),str(desample))])
