@@ -60,7 +60,7 @@ def potential(x):
 
 def yxpotential(y,x):
     U = 10.0
-    return U * (((0.5 - math.pow(math.cos(6*3.141592*(0.65*x-L/2)/L)/2,2.0)) + (0.5 - math.pow(math.cos(6*3.141592*(0.65*y-L/2)/L)/2,2.0)))/2);
+    return U * (((0.5 - math.pow(math.cos(6*3.141592*(0.65*x-L/2)/L)/2,2.0)) + (0.5 - math.pow(math.cos(6*3.141592*(0.65*y-L/2)/L)/2,2.0)))/2) + x; # + x adds gradient in x direction
 
 if __name__ == '__main__':
     #x = int(raw_input())
@@ -68,49 +68,25 @@ if __name__ == '__main__':
     #z = int(raw_input())
     #n = int(raw_input())
 
-    #psi[2][2][N][N]  # wavefunction array in position space
-    #chi[2][2][N][N] # wavefunction in momentum space
-    # Create array of the input point to print them out
-    #ar = [x,y,z]
-    #print(ar)
     # define initial parameters
     N = 128 # number of evenly spaced points
-    L = 60.0 # Length of the box ( box is simulation space in world coordinates )
-    dt = 0.01 # Time-step
+    L = 40.0 # Length of the box ( box is simulation space in world coordinates )
+    dt = 0.005 # Time-step
     t0 = 0.0 # Initial time
     tf = 3.0 # final time
     dx = L/N # distance between points in program dimensions
-
-    num = 0 # for outfield iterator
-    div = 4 # scale factor for reducing frequency of the time-step
-    desample = div # desampling factor for output after calculation
-
+    t = 0.0
+    desample = 8 # desampling factor for output after calculation
     # amplitude for initial potential settings
     amplitude = 2.0
     A = amplitude
     # fill in the rest of the initial settings
     # sigma of gaussian
     sigma = 5.73
-
-    realsum = 0.0
-    complexsum = 0.0
-    probabilitysum = 0.0
-    slicenum = 0 # count number of slices
-
-    #x = 0.0
-    #y = 0.0
-    #p = 0.0
-    #px = 0.0
-    #py = 0.0
-    #kx = 0.0
-    #ky = 0.0
-
-    num = 0 # used for output iterator
+    num = 0 # for outfield iterator
     real = 0 # real and imaginary parts of our wave-function
     imag = 1 # for accessing the array parts with more clarity
 
-
-    t = 0.0
     # initialize arrays
     psi = np.zeros((2,2,N,N)) # wavefunction in  position space
     chi = np.zeros((2,2,N,N)) # wavefunction in fourier space
@@ -134,7 +110,7 @@ if __name__ == '__main__':
     backwardin = pyfftw.empty_aligned((N,N), dtype='complex128')
     backwardout = pyfftw.empty_aligned((N,N), dtype='complex128')
 
-
+    # Setup initial gaussian
     for i in range(N):
         y = (i * dx) - (L/3.8) # or 3.8
         for j in range(N):
@@ -235,25 +211,8 @@ if __name__ == '__main__':
 
         t += dt
     # when simulation has reached time final
-    plt.imshow(phi,cmap='hot',interpolation='nearest')
-    plt.show()
-    N = 128 # number of evenly spaced points
-    L = 60.0 # Length of the box ( box is simulation space in world coordinates ) 60.0
-    dt = 0.01 # Time-step 0.01
-    t0 = 0.0 # Initial time
-    tf = 50.0 # final time 50.0
-    dx = L/N # distance between points in program dimensions
-
-    num = 0 # for outfield iterator
-    div = 4 # scale factor for reducing frequency of the time-step
-    desample = div # desampling factor for output after calculation
-
-    # amplitude for initial potential settings
-    amplitude = 1.0 # 2.0
-    A = amplitude
-    # fill in the rest of the initial settings
-    # sigma of gaussian
-    sigma = 5.73 # 5.73
+    #plt.imshow(phi,cmap='hot',interpolation='nearest')
+    #plt.show()
     outdt = str(dt).translate(None, string.punctuation)
     returncode = subprocess.call(['ffmpeg','-r','30','-f','image2','-s','640x480','-i','outfields/field%'+'04d.png','-vcodec','libx264','-crf','25','-pix_fmt','yuv420p','fields_out_%d_%d_%s_%d.mp4' % (N,math.floor(L),outdt,desample)])
     print('returncode:', returncode)
