@@ -5,6 +5,19 @@ matplotlib.pyplot
 seaborn
 pyfftw
 
+# Sample Normalized Output
+## Initial Conditions
+```python
+y = (i * dx) - (L/3.8) # or 3.8
+x = (j*dx) - (L/3.8) # or 3.8
+kx = ((0.7 * math.pi) / L)
+ky = ((1.0 * math.pi) / L)
+```
+N = 128, L = 40.0, U = 80.0, dt = 0.01 tf = 50.0 undersampled = 2 twice
+<p align="center">
+<img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/media/sample.gif"/>
+</p>
+
 ## Usage:
   
   python dev-2Dparticle.py
