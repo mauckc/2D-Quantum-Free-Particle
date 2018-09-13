@@ -60,7 +60,7 @@ def xnormed(x):
     return  x / x.max()
 
 def potential(x):
-    U = 1.0
+    U = 10.0
     return U * ( 2.0 - math.pow(math.cos(6*3.141592*(0.65*x-L/2)/L)/2,2.0));
 
 if __name__ == '__main__':
@@ -73,11 +73,11 @@ if __name__ == '__main__':
     #ar = [x,y,z]
     #print(ar)
     # define initial parameters
-    N = 256 # number of evenly spaced points
+    N = 128 # number of evenly spaced points
     L = 40.0 # Length of the box ( box is simulation space in world coordinates )
     dt = 0.01 # Time-step
     t0 = 0.0 # Initial time
-    tf = 1.0 # final time
+    tf = 50.0 # final time
     dx = L/N # distance between points in program dimensions
 
     num = 0 # for outfield iterator
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     A = amplitude
     # fill in the rest of the initial settings
     # sigma of gaussian
-    sigma = 2.73
+    sigma = 1.73
 
     realsum = 0.0
     complexsum = 0.0
@@ -139,11 +139,11 @@ if __name__ == '__main__':
 
 
     for i in range(N):
-        y = (i * dx) - (L/2) # or 3.8
+        y = (i * dx) - (L/3.8) # or 3.8
         for j in range(N):
-            x = (j*dx) - (L/2) # or 3.8
-            kx = ((25.0 * math.pi) / L)
-            ky = ((15.0 * math.pi) / L)
+            x = (j*dx) - (L/3.8) # or 3.8
+            kx = ((0.7 * math.pi) / L)
+            ky = ((1.0 * math.pi) / L)
             A = amplitude
 
             # set the gaussian fields in position space
@@ -228,10 +228,8 @@ if __name__ == '__main__':
             plt.savefig('outfields/field%04d.png' % outnum)
             #plt.show()
 
-            print("\nprinting field number ")
-            print( num )
-            print( "at time: ")
-            print(t)
+            print("\nprinting field number "+str(num)+" output number"+str(outnum))
+            print( "at time: "+str(t))
             outnum += 1
         num += 1
 
