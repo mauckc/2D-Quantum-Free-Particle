@@ -1,6 +1,6 @@
 #
 # Python Implementation of 2D-Quantum-Free-Particle schrodinger solver split step method:
-# This is the version that normalized the field once at every time step
+#
 
 from __future__ import print_function
 import numpy as np
@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 #import seaborn as sns
 import pyfftw
 import os
+import subprocess
+import string
 
 directory = "outfields"
 
@@ -29,33 +31,6 @@ def calcavg(field):
             total += field[i][j]
     return total/(N*N)
 
-def calcPsiProbability(phi, chi):
-    for i in range(N):
-        for j in range(N):
-            psiprob[i,j] = psi[0][real][j][i] * psi[0][real][j][i] + psi[0][imag][j][i] * psi[0][imag][j][i]
-    return psiprob
-
-def outputfield(outfieldnumber):
-    # open file
-    # output each field like c++ i.e.: fprintf(slicefield,"%d %d %lf %lf", i, j, psi[0][real][i][j],psi[0][imag][i][j], psiprob[i][j])
-    return
-
-def ddfield(field, dfield):
-
-    return # second derivative of the field
-
-def sumxyz(x, y, z):
-    sumvar = x + y + z
-    return sumvar
-
-def checksum(sumvar, n):
-    if sumvar is n:
-        checkstate = True
-    else:
-        checkstate = False
-
-    return checkstate
-
 def sum1(input):
     return sum(map(sum, input))
 
@@ -65,9 +40,27 @@ def max1(input):
 def xnormed(x):
     return  x / x.max()
 
+def calcPsiProbability(phi, chi):
+    for i in range(N):
+        for j in range(N):
+            psiprob[i,j] = psi[0][real][j][i] * psi[0][real][j][i] + psi[0][imag][j][i] * psi[0][imag][j][i]
+    return psiprob
+
+def checksum(sumvar, n):
+    if sumvar is n:
+        checkstate = True
+    else:
+        checkstate = False
+
+    return checkstate
+
 def potential(x):
     U = 10.0
-    return U * ( 2.0 - math.pow(math.cos(6*3.141592*(0.65*x-L/2)/L)/2,2.0));
+    return U * ( 0.5 - math.pow(math.cos(6*3.141592*(0.65*x-L/2)/L)/2,2.0));
+
+def yxpotential(y,x):
+    U = 10.0
+    return U * (((0.5 - math.pow(math.cos(6*3.141592*(0.65*x-L/2)/L)/2,2.0)) + (0.5 - math.pow(math.cos(6*3.141592*(0.65*y-L/2)/L)/2,2.0)))/2);
 
 if __name__ == '__main__':
     #x = int(raw_input())
@@ -75,31 +68,29 @@ if __name__ == '__main__':
     #z = int(raw_input())
     #n = int(raw_input())
 
+    #psi[2][2][N][N]  # wavefunction array in position space
+    #chi[2][2][N][N] # wavefunction in momentum space
     # Create array of the input point to print them out
     #ar = [x,y,z]
     #print(ar)
     # define initial parameters
-    N = 256 # number of evenly spaced points
-    L = 40.0 # Length of the box ( box is simulation space in world coordinates )
+    N = 128 # number of evenly spaced points
+    L = 60.0 # Length of the box ( box is simulation space in world coordinates )
     dt = 0.01 # Time-step
     t0 = 0.0 # Initial time
-    tf = 50.0 # final time
+    tf = 3.0 # final time
     dx = L/N # distance between points in program dimensions
 
     num = 0 # for outfield iterator
-
-    #psi[2][2][N][N]  # wavefunction array in position space
-    #chi[2][2][N][N] # wavefunction in momentum space
-
-    div = 1 # scale factor for reducing frequency of the time-step
-    desample = 4 # desampling factor for output after calculation
+    div = 4 # scale factor for reducing frequency of the time-step
+    desample = div # desampling factor for output after calculation
 
     # amplitude for initial potential settings
-    amplitude = 1.0
+    amplitude = 2.0
     A = amplitude
     # fill in the rest of the initial settings
     # sigma of gaussian
-    sigma = 1.73
+    sigma = 5.73
 
     realsum = 0.0
     complexsum = 0.0
@@ -148,8 +139,8 @@ if __name__ == '__main__':
         y = (i * dx) - (L/3.8) # or 3.8
         for j in range(N):
             x = (j*dx) - (L/3.8) # or 3.8
-            kx = ((0.7 * math.pi) / L)
-            ky = ((1.0 * math.pi) / L)
+            kx = ((1000.7 * math.pi) / L)
+            ky = ((10.0 * math.pi) / L)
             A = amplitude
 
             # set the gaussian fields in position space
@@ -179,8 +170,8 @@ if __name__ == '__main__':
             y = (i*dx - (L/2))
             for j in range(N):
                 x = (j*dx - (L/2))
-                psi[1][real][i][j] = psi[0][real][i][j] * math.cos(potential(x) * dt) + psi[0][imag][i][j] * math.sin(potential(x)*dt)
-                psi[1][imag][i][j] = psi[0][imag][i][j] * math.cos(potential(x) * dt) + psi[0][real][i][j] * math.sin(potential(x)*dt)
+                psi[1][real][i][j] = psi[0][real][i][j] * math.cos(yxpotential(y,x) * dt) + psi[0][imag][i][j] * math.sin(yxpotential(y,x)*dt)
+                psi[1][imag][i][j] = psi[0][imag][i][j] * math.cos(yxpotential(y,x) * dt) + psi[0][real][i][j] * math.sin(yxpotential(y,x)*dt)
         # load the input array for the transform
         for i in range(N):
             for j in range(N):
@@ -195,6 +186,9 @@ if __name__ == '__main__':
                 chi[0][real][i][j] = forwardout[i,j].real
                 chi[0][imag][i][j] = forwardout[i,j].imag
 
+        # Nomalize before updating in momentum space
+        chi[0][real] = xnormed(chi[0][real])
+        chi[0][imag] = xnormed(chi[0][imag])
         # update field in momentum space
         for i in range(N):
             py = ((2*math.pi)/L) * (((i + (N/2)) / N) - N/2)
@@ -228,7 +222,7 @@ if __name__ == '__main__':
         print("Phi sum1:"+str(sum1(phi)))
         print("Phi max:"+str(max1(phi)))
         print("Phi avg:"+str(calcavg(phi)))
-        if num % 2 is 0:
+        if num % desample is 0:
             #phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
             plt.imshow(phi,cmap='hot',interpolation='nearest')
             plt.savefig('outfields/field%04d.png' % outnum)
@@ -243,3 +237,24 @@ if __name__ == '__main__':
     # when simulation has reached time final
     plt.imshow(phi,cmap='hot',interpolation='nearest')
     plt.show()
+    N = 128 # number of evenly spaced points
+    L = 60.0 # Length of the box ( box is simulation space in world coordinates ) 60.0
+    dt = 0.01 # Time-step 0.01
+    t0 = 0.0 # Initial time
+    tf = 50.0 # final time 50.0
+    dx = L/N # distance between points in program dimensions
+
+    num = 0 # for outfield iterator
+    div = 4 # scale factor for reducing frequency of the time-step
+    desample = div # desampling factor for output after calculation
+
+    # amplitude for initial potential settings
+    amplitude = 1.0 # 2.0
+    A = amplitude
+    # fill in the rest of the initial settings
+    # sigma of gaussian
+    sigma = 5.73 # 5.73
+    outdt = str(dt).translate(None, string.punctuation)
+    returncode = subprocess.call(['ffmpeg','-r','30','-f','image2','-s','640x480','-i','outfields/field%'+'04d.png','-vcodec','libx264','-crf','25','-pix_fmt','yuv420p','fields_out_%d_%d_%s_%d.mp4' % (N,math.floor(L),outdt,desample)])
+    print('returncode:', returncode)
+    # call(["./argpngs2mp4.sh %s %s %s %s " % (str(N),str(round(L,1)),str(round(dt,3)),str(desample))])
