@@ -6,7 +6,7 @@ from __future__ import print_function
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-import seaborn as sns
+#import seaborn as sns
 import pyfftw
 
 def calcsum(field):
@@ -43,10 +43,8 @@ def checksum(sumvar, n):
 
     return checkstate
 
-L = 5.0 # Length of the box ( box is simulation space in world coordinates )
-
 def potential(x):
-    U = 50.0
+    U = 40.0
     return U * ( 1.0 - math.pow(math.cos(6*3.141592*(0.65*x-L/2)/L)/2,2.0));
 
 if __name__ == '__main__':
@@ -61,9 +59,9 @@ if __name__ == '__main__':
     # define initial parameters
     N = 256 # number of evenly spaced points
     L = 20.0 # Length of the box ( box is simulation space in world coordinates )
-    dt = 0.5 # Time-step
+    dt = 0.01 # Time-step
     t0 = 0.0 # Initial time
-    tf = 5.0 # final time
+    tf = 10.0 # final time
     dx = L/N # distance between points in program dimensions
 
     num = 0 # for outfield iterator
@@ -76,7 +74,7 @@ if __name__ == '__main__':
 
     # amplitude for initial potential settings
     amplitude = 1.0
-    A = 1.
+    A = amplitude
     # fill in the rest of the initial settings
     # sigma of gaussian
     sigma = 0.73
@@ -137,18 +135,19 @@ if __name__ == '__main__':
             psi[0][imag][i][j] = A * math.sin(kx*x+ky*y) * math.exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)))
 
             phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
-    print("Initial Conditions Set..")
 
-    #print(phi)
+
+    print("Initial Conditions Set..")
 
     # begin time evolution
     plt.imshow(phi,cmap='hot',interpolation='nearest')
     plt.show()
-
+    plt.savefig('outfields/field%04d.png' % num)
+    num += 1
     # alternative ploting
-    ax = sns.heatmap(phi, linewidth=0.5)
-    plt.show()
+    #ax = sns.heatmap(phi, linewidth=0.5)
 
+    # Start time simulation loop
     while(t<tf):
 
         # update field in position space with respect to potential for real
@@ -175,9 +174,9 @@ if __name__ == '__main__':
 
         # update field in momentum space
         for i in range(N):
-            px = ((2*math.pi)/L) * (((i + (N/2)) / N) - N/2)
+            py = ((2*math.pi)/L) * (((i + (N/2)) / N) - N/2)
             for j in range(N):
-                py = ((2*math.pi)/L) * (((j + (N/2)) / N) - N/2)
+                px = ((2*math.pi)/L) * (((j + (N/2)) / N) - N/2)
                 chi[1][real][i][j] = chi[0][imag][i][j] * math.sin((dt*(px*px+py*py))/2) + chi[0][real][i][j] * math.cos((dt*(px*px+py*py))/2)
                 chi[1][imag][i][j] = chi[0][imag][i][j] * math.cos((dt*(px*px+py*py))/2) - chi[0][real][i][j] * math.sin((dt*(px*px+py*py))/2)
 
@@ -193,17 +192,24 @@ if __name__ == '__main__':
                 psi[0][real][i][j] = backwardout[i,j].real
                 psi[0][imag][i][j] = backwardout[i,j].imag
 
-        # piq
-        if num % 10 is 0:
-            phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
+        for i in range(N):
+            for j in range(N):
+                phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
+
+        print("Phi sum:")
+        print(calcsum(phi))
+        if num % 2 is 0:
+            #phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
             plt.imshow(phi,cmap='hot',interpolation='nearest')
+            plt.savefig('outfields/field%04d.png' % num)
             plt.show()
-            print("\n printing field number ")
+
+            print("\nprinting field number ")
             print( num )
-            print( " at time: ")
+            print( "at time: ")
             print(t)
         num += 1
-        t = t + dt
+        t += dt
     # when simulation has reached time final
     plt.imshow(phi,cmap='hot',interpolation='nearest')
     plt.show()
