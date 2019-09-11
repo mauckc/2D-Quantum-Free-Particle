@@ -1,5 +1,7 @@
 # 2D-Quantum-Free-Particle
 
+The mechanics of quantum free particles can be hard to study tangibly. With scientific computing, we are able to build a numerically stable simulation environment to test out models.
+
 This program numerically integrates the Schrodinger equation on finite complex scalar fields for simulating interactions of quantum particles under varied observation.
 
 The goal: Can the Quantum-Zeno Effect a.k.a. the watch dog effect be modeled on an N-dimensional finite difference point lattice. The effects of repeated observation on a quantum wavefunction tend to resist the effects quantum tunneling.
