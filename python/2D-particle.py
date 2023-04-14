@@ -6,8 +6,8 @@ from __future__ import print_function
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-#import seaborn as sns
 import pyfftw
+import os
 
 def calcsum(field):
     total = 0.0
@@ -36,7 +36,7 @@ def sumxyz(x, y, z):
     return sumvar
 
 def checksum(sumvar, n):
-    if sumvar is n:
+    if sumvar == n:
         checkstate = True
     else:
         checkstate = False
@@ -45,7 +45,74 @@ def checksum(sumvar, n):
 
 def potential(x):
     U = 40.0
-    return U * ( 1.0 - math.pow(math.cos(6*3.141592*(0.65*x-L/2)/L)/2,2.0));
+    return U * (1.0 - np.power(np.cos(6 * np.pi * (0.65 * x - L / 2) / L) / 2, 2.0))
+
+# def double_slit_potential(x, y, L, barrier_width, slit_width, barrier_potential):
+#     # The barrier is in the middle of the domain
+#     barrier_center = L / 2
+#     slit_center = L / 2
+#     # Check if the point is within the barrier region
+#     if barrier_center - barrier_width / 2 < x < barrier_center + barrier_width / 2:
+#         # Check if the point is within either of the two slits
+#         if slit_center - 3 * slit_width / 2 < y < slit_center - slit_width / 2 or \
+#            slit_center + slit_width / 2 < y < slit_center + 3 * slit_width / 2:
+#             return 0.0
+#         else:
+#             return barrier_potential
+#     else:
+#         return 0.0
+
+def double_slit_potential(x, y, L, barrier_width, slit_width, slit_distance, barrier_potential):
+    barrier_center = L / 2
+    slit_center = L / 2
+
+    if barrier_center - barrier_width / 2 < x < barrier_center + barrier_width / 2:
+        half_slit_length = slit_width / 2
+        half_slit_distance = slit_distance / 2
+        
+        if slit_center - half_slit_length - half_slit_distance < y < slit_center - half_slit_length + half_slit_distance or \
+           slit_center + half_slit_length - half_slit_distance < y < slit_center + half_slit_length + half_slit_distance:
+            return 0.0
+        else:
+            return barrier_potential
+    else:
+        return 0.0
+
+def visualize_potential(L, N):
+    x_values = np.linspace(-L / 2, L / 2, N)
+    y_values = np.linspace(-L / 2, L / 2, N)
+    X, Y = np.meshgrid(x_values, y_values)
+    Z = np.zeros((N, N))
+
+    for i in range(N):
+        for j in range(N):
+            Z[i, j] = potential(X[i, j])
+
+    plt.figure()
+    plt.imshow(Z, cmap='viridis', extent=(-L / 2, L / 2, -L / 2, L / 2), origin='lower')
+    plt.colorbar(label='Potential')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title('Potential Function Visualization')
+    plt.show()
+
+def visualize_double_slit_potential(L, N, barrier_width, slit_width, slit_distance, barrier_potential):
+    x_values = np.linspace(0, L, N)
+    y_values = np.linspace(0, L, N)
+    X, Y = np.meshgrid(x_values, y_values)
+    Z = np.zeros((N, N))
+
+    for i in range(N):
+        for j in range(N):
+            Z[i, j] = double_slit_potential(X[i, j], Y[i, j], L, barrier_width, slit_width, slit_distance, barrier_potential)
+
+    plt.figure()
+    plt.imshow(Z, cmap='viridis', extent=(0, L, 0, L), origin='lower')
+    plt.colorbar(label='Potential')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title('Double-slit Potential Function Visualization')
+    plt.show()
 
 if __name__ == '__main__':
     #x = int(raw_input())
@@ -57,13 +124,20 @@ if __name__ == '__main__':
     #ar = [x,y,z]
     #print(ar)
     # define initial parameters
-    N = 256 # number of evenly spaced points
-    L = 20.0 # Length of the box ( box is simulation space in world coordinates )
-    dt = 0.01 # Time-step
+    N = 128 # number of evenly spaced points
+    L = 10.0 # Length of the box ( box is simulation space in world coordinates )
+    dt = 0.001 # Time-step
     t0 = 0.0 # Initial time
-    tf = 10.0 # final time
+    tf = 5.0 # final time
     dx = L/N # distance between points in program dimensions
 
+    barrier_width = 0.5
+    slit_width = 1.0
+    slit_distance = 0.5
+    barrier_potential = 200.0
+
+
+    
     num = 0 # for outfield iterator
 
     #psi[2][2][N][N]  # wavefunction array in position space
@@ -72,6 +146,8 @@ if __name__ == '__main__':
     div = 1 # scale factor for reducing frequency of the time-step
     desample = 4 # desampling factor for output after calculation
 
+    kx_magnitude = -5.0
+    ky_magnitude = 0.0
     # amplitude for initial potential settings
     amplitude = 1.0
     A = amplitude
@@ -123,11 +199,11 @@ if __name__ == '__main__':
 
 
     for i in range(N):
-        y = (i * dx) - (L/3.8)
+        y = (i * dx) - (L/2)
         for j in range(N):
             x = (j*dx) - (L/3.8)
-            kx = ((20.0 * math.pi) / L)
-            ky = ((4.0 * math.pi) / L)
+            kx = ((kx_magnitude * math.pi) / L)
+            ky = ((ky_magnitude * math.pi) / L)
             A = amplitude
 
             # set the gaussian fields in position space
@@ -135,13 +211,19 @@ if __name__ == '__main__':
             psi[0][imag][i][j] = A * math.sin(kx*x+ky*y) * math.exp(-((x*x)/(4*sigma*sigma) + (y*y)/(4*sigma*sigma)))
 
             phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
+    
 
+    print("Visualizing the potential")
+    # visualize_potential(L, N)
+    visualize_double_slit_potential(L, N, barrier_width, slit_width, slit_distance, barrier_potential)
 
     print("Initial Conditions Set..")
 
     # begin time evolution
     plt.imshow(phi,cmap='hot',interpolation='nearest')
     plt.show()
+    if not os.path.exists('outfields'):
+        os.mkdir('outfields')
     plt.savefig('outfields/field%04d.png' % num)
     num += 1
     # alternative ploting
@@ -156,14 +238,14 @@ if __name__ == '__main__':
             y = (i*dx - (L/2))
             for j in range(N):
                 x = (j*dx - (L/2))
-                psi[1][real][i][j] = psi[0][real][i][j] * math.cos(potential(x) * dt) + psi[0][imag][i][j] * math.sin(potential(x)*dt)
-                psi[1][imag][i][j] = psi[0][imag][i][j] * math.cos(potential(x) * dt) + psi[0][real][i][j] * math.sin(potential(x)*dt)
+                psi[1][real][i][j] = psi[0][real][i][j] * math.cos(double_slit_potential(x,y,L,barrier_width,slit_width,slit_distance,barrier_potential) * dt) + psi[0][imag][i][j] * math.sin(double_slit_potential(x,y,L,barrier_width,slit_width,slit_distance,barrier_potential)*dt)
+                psi[1][imag][i][j] = psi[0][imag][i][j] * math.cos(double_slit_potential(x,y,L,barrier_width,slit_width,slit_distance,barrier_potential) * dt) + psi[0][real][i][j] * math.sin(double_slit_potential(x,y,L,barrier_width,slit_width,slit_distance,barrier_potential)*dt)
         # load the input array for the transform
         for i in range(N):
             for j in range(N):
                 forwardin[i,j] = psi[1][real][i][j] + 1j*psi[1][imag][i][j]
         # perform the transform
-        forwardout = pyfftw.interfaces.numpy_fft.fft(forwardin)
+        forwardout = pyfftw.interfaces.numpy_fft.fft2(forwardin)
 
         #print(forwardout)
         print(np.shape(forwardout))
@@ -172,11 +254,13 @@ if __name__ == '__main__':
                 chi[0][real][i][j] = forwardout[i,j].real
                 chi[0][imag][i][j] = forwardout[i,j].imag
 
+        k_values = np.fft.fftfreq(N, d=dx) * 2 * np.pi
+        k_values_shifted = np.fft.ifftshift(k_values)
         # update field in momentum space
         for i in range(N):
-            py = ((2*math.pi)/L) * (((i + (N/2)) / N) - N/2)
+            py = k_values_shifted[i]
             for j in range(N):
-                px = ((2*math.pi)/L) * (((j + (N/2)) / N) - N/2)
+                px = k_values_shifted[j]
                 chi[1][real][i][j] = chi[0][imag][i][j] * math.sin((dt*(px*px+py*py))/2) + chi[0][real][i][j] * math.cos((dt*(px*px+py*py))/2)
                 chi[1][imag][i][j] = chi[0][imag][i][j] * math.cos((dt*(px*px+py*py))/2) - chi[0][real][i][j] * math.sin((dt*(px*px+py*py))/2)
 
@@ -185,8 +269,9 @@ if __name__ == '__main__':
             for j in range(N):
                 backwardin[i,j] = chi[1][real][i][j] + 1j*chi[1][imag][i][j]
 
-        # switch back to position spaces
-        backwardout = pyfftw.interfaces.numpy_fft.fft(backwardin)
+        # switch back to position space
+        backwardout = pyfftw.interfaces.numpy_fft.ifft2(backwardin)
+
         for i in range(N):
             for j in range(N):
                 psi[0][real][i][j] = backwardout[i,j].real
@@ -198,11 +283,13 @@ if __name__ == '__main__':
 
         print("Phi sum:")
         print(calcsum(phi))
-        if num % 2 is 0:
+        if num % div == 0:
             #phi[i,j] = psi[0][real][i][j] * psi[0][real][i][j] + psi[0][imag][i][j] * psi[0][imag][i][j]
             plt.imshow(phi,cmap='hot',interpolation='nearest')
             plt.savefig('outfields/field%04d.png' % num)
-            plt.show()
+            plt.pause(.05)
+            plt.draw()
+            # plt.show()
 
             print("\nprinting field number ")
             print( num )
