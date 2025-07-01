@@ -20,6 +20,10 @@ ______
 STEP 1 PICS: Convert 2Dparticle output (.dat) to images using python2 and matplotlib
 
     python convert-data-to-video.py
+
+Quickly inspect a single slice as a heatmap
+
+    python plot_slice.py slices/slices_fields_0.dat -o slice.png
 ______
 STEP 2 VIDEO: Convert plot images to video using FFmpeg library
 
