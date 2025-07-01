@@ -144,7 +144,20 @@ Created output will be saved as a ".dat" file in this directory: "2D-Quantum-Fre
 
  <p align="center">
   <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/media/particle_2D_1.gif"/>
-</p>
+ </p>
+
+## CUDA GPU VERSION
+
+The repository also provides a GPU implementation using CUDA in
+`gpu/2D_particle_cuda.cu`. It requires the CUDA toolkit and the cuFFT
+library. Compile it with:
+
+```bash
+nvcc gpu/2D_particle_cuda.cu -lcufft -o gpu/2DparticleCUDA
+```
+
+Running this executable produces text output of the final probability at
+the center of the grid.
 
 ## Modifying the intial parameters
 
