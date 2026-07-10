@@ -4,12 +4,14 @@ import numpy as np
 
 from quantum_dynamics_lab.cli import main
 from quantum_dynamics_lab.config import (
+    BoundaryConfig,
     ExperimentConfig,
     GridConfig,
     MeasurementConfig,
     PotentialConfig,
     SolverConfig,
     WavePacketConfig,
+    load_sweep_config,
 )
 from quantum_dynamics_lab.experiments import run_experiment
 from quantum_dynamics_lab.grid import make_grid, norm, normalize
@@ -79,6 +81,24 @@ def test_barrier_zeno_fast_measurement_reduces_detection() -> None:
         fast.metrics["final_detected_probability"]
         < slow.metrics["final_detected_probability"]
     )
+    assert "final_unconditional_transmission_probability" in fast.metrics
+
+
+def test_absorbing_boundary_tracks_probability_loss() -> None:
+    result = run_experiment(
+        ExperimentConfig(
+            name="absorber",
+            experiment="free_packet",
+            grid=GridConfig(n=32, length=8.0),
+            wave_packet=WavePacketConfig(center=(2.6, 0.0), sigma=0.45, momentum=(5.0, 0.0)),
+            potential=PotentialConfig(kind="free"),
+            solver=SolverConfig(dt=0.002, tf=0.25, frame_interval=0.05),
+            boundary=BoundaryConfig(kind="absorbing", width=1.2, strength=5.0),
+        )
+    )
+
+    assert result.metrics["final_absorbed_probability"] > 0.0
+    assert result.metrics["final_survival_weight"] < 1.0
 
 
 def test_double_slit_which_path_reduces_interference_contrast() -> None:
@@ -125,3 +145,75 @@ def test_cli_run_and_render_smoke(tmp_path) -> None:
     assert main(["render", str(out / "run.npz"), "--out", str(out / "report")]) == 0
     assert (out / "report" / "summary.png").exists()
     assert (out / "report" / "potential.png").exists()
+    assert (out / "report" / "report.md").exists()
+
+
+def test_research_sweep_scan_expands_variants() -> None:
+    sweep = load_sweep_config("examples/zeno_research_sweep.toml")
+
+    assert len(sweep.variants) == 12
+    assert sweep.variants[0].potential_height == 25.0
+    assert sweep.variants[0].measurement_interval is None
+
+
+def test_compare_generates_polished_report(tmp_path) -> None:
+    base = tmp_path / "base.toml"
+    base.write_text(
+        """
+name = "small_zeno"
+experiment = "barrier_zeno"
+
+[grid]
+n = 24
+length = 8.0
+
+[wave_packet]
+center = [-2.0, 0.0]
+sigma = 0.45
+momentum = [4.0, 0.0]
+
+[potential]
+kind = "barrier"
+height = 30.0
+barrier_x = 0.0
+barrier_width = 0.25
+
+[solver]
+dt = 0.004
+tf = 0.12
+frame_interval = 0.04
+
+[boundary]
+kind = "absorbing"
+width = 1.0
+strength = 4.0
+
+[measurement]
+kind = "zeno"
+interval = 0.08
+detector_buffer = 0.25
+
+[output]
+render_video = false
+""",
+        encoding="utf-8",
+    )
+    sweep = tmp_path / "sweep.toml"
+    sweep.write_text(
+        """
+name = "small_sweep"
+base_config = "base.toml"
+
+[scan]
+potential_heights = [30.0]
+measurement_intervals = [0.0, 0.08]
+""",
+        encoding="utf-8",
+    )
+    out = tmp_path / "comparison"
+
+    assert main(["compare", str(sweep), "--out", str(out)]) == 0
+    assert (out / "comparison.csv").exists()
+    assert (out / "comparison.png").exists()
+    assert (out / "zeno_transmission_heatmap.png").exists()
+    assert (out / "report.md").exists()

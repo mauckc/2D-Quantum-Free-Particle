@@ -16,6 +16,7 @@ uv run pytest
 uv run quantum-lab run examples/free_packet.toml --out runs/free_packet
 uv run quantum-lab run examples/barrier_zeno.toml --out runs/barrier_zeno
 uv run quantum-lab compare examples/zeno_sweep.toml --out reports/zeno_sweep
+uv run quantum-lab compare examples/zeno_research_sweep.toml --out reports/zeno_research_sweep
 uv run quantum-lab render runs/free_packet/run.npz --out reports/free_packet
 ```
 
@@ -33,6 +34,15 @@ Supported v1 experiments:
 
 The maintained implementation lives in `src/quantum_dynamics_lab/`; example
 experiment configs live in `examples/`; tests live in `tests/`.
+
+For Zeno barrier experiments, the maintained workflow now supports optional
+absorbing edge boundaries and explicit detector placement. Repeated
+measurements are modeled as no-click projections: probability in the detector
+region is accumulated as detector-click probability, removed from the
+conditional wavefunction, and the no-click branch is renormalized while
+survival weight tracks the unconditional probability. Generated comparison
+reports include `comparison.csv`, `comparison.png`, `zeno_transmission_heatmap.png`,
+and `report.md`.
 
 ---
 
