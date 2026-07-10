@@ -40,10 +40,20 @@ class SolverConfig:
 
 
 @dataclass(frozen=True)
+class BoundaryConfig:
+    kind: str = "periodic"
+    width: float = 0.0
+    strength: float = 0.0
+    power: float = 2.0
+
+
+@dataclass(frozen=True)
 class MeasurementConfig:
     kind: str = "none"
     interval: float | None = None
     time: float | None = None
+    detector_x: float | None = None
+    detector_buffer: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -60,6 +70,7 @@ class ExperimentConfig:
     wave_packet: WavePacketConfig = field(default_factory=WavePacketConfig)
     potential: PotentialConfig = field(default_factory=PotentialConfig)
     solver: SolverConfig = field(default_factory=SolverConfig)
+    boundary: BoundaryConfig = field(default_factory=BoundaryConfig)
     measurement: MeasurementConfig = field(default_factory=MeasurementConfig)
     output: OutputConfig = field(default_factory=OutputConfig)
 
@@ -72,6 +83,7 @@ class SweepVariant:
     name: str
     measurement_kind: str = "zeno"
     measurement_interval: float | None = None
+    potential_height: float | None = None
 
 
 @dataclass(frozen=True)
@@ -102,6 +114,7 @@ def load_experiment_config(path: str | Path) -> ExperimentConfig:
     wave_data = _section(data, "wave_packet")
     potential_data = _section(data, "potential")
     solver_data = _section(data, "solver")
+    boundary_data = _section(data, "boundary")
     measurement_data = _section(data, "measurement")
     output_data = _section(data, "output")
 
@@ -137,6 +150,12 @@ def load_experiment_config(path: str | Path) -> ExperimentConfig:
         hbar=float(solver_data.get("hbar", SolverConfig.hbar)),
         mass=float(solver_data.get("mass", SolverConfig.mass)),
     )
+    boundary = BoundaryConfig(
+        kind=str(boundary_data.get("kind", BoundaryConfig.kind)),
+        width=float(boundary_data.get("width", BoundaryConfig.width)),
+        strength=float(boundary_data.get("strength", BoundaryConfig.strength)),
+        power=float(boundary_data.get("power", BoundaryConfig.power)),
+    )
     measurement = MeasurementConfig(
         kind=str(measurement_data.get("kind", MeasurementConfig.kind)),
         interval=(
@@ -146,6 +165,14 @@ def load_experiment_config(path: str | Path) -> ExperimentConfig:
         ),
         time=(
             None if measurement_data.get("time") is None else float(measurement_data["time"])
+        ),
+        detector_x=(
+            None
+            if measurement_data.get("detector_x") is None
+            else float(measurement_data["detector_x"])
+        ),
+        detector_buffer=float(
+            measurement_data.get("detector_buffer", MeasurementConfig.detector_buffer)
         ),
     )
     output = OutputConfig(
@@ -159,6 +186,7 @@ def load_experiment_config(path: str | Path) -> ExperimentConfig:
         wave_packet=wave,
         potential=potential,
         solver=solver,
+        boundary=boundary,
         measurement=measurement,
         output=output,
     )
@@ -170,13 +198,33 @@ def load_sweep_config(path: str | Path) -> SweepConfig:
     variants = []
     for item in data.get("variants", []):
         interval = item.get("measurement_interval")
+        height = item.get("potential_height")
         variants.append(
             SweepVariant(
                 name=str(item["name"]),
                 measurement_kind=str(item.get("measurement_kind", "zeno")),
                 measurement_interval=None if interval is None else float(interval),
+                potential_height=None if height is None else float(height),
             )
         )
+    scan = data.get("scan", {})
+    if scan:
+        intervals = [float(value) for value in scan.get("measurement_intervals", [])]
+        heights = [float(value) for value in scan.get("potential_heights", [])]
+        if not intervals:
+            intervals = [0.0]
+        if not heights:
+            heights = [0.0]
+        for height in heights:
+            for interval in intervals:
+                variants.append(
+                    SweepVariant(
+                        name=_scan_variant_name(height, interval),
+                        measurement_kind="none" if interval <= 0 else "zeno",
+                        measurement_interval=None if interval <= 0 else interval,
+                        potential_height=height,
+                    )
+                )
     base_config = Path(str(data["base_config"]))
     if not base_config.is_absolute():
         base_config = path.parent / base_config
@@ -194,4 +242,18 @@ def apply_sweep_variant(config: ExperimentConfig, variant: SweepVariant) -> Expe
         kind = "none"
         interval = None
     measurement = replace(config.measurement, kind=kind, interval=interval)
-    return replace(config, name=variant.name, measurement=measurement)
+    potential = config.potential
+    if variant.potential_height is not None:
+        potential = replace(potential, height=variant.potential_height)
+    return replace(config, name=variant.name, potential=potential, measurement=measurement)
+
+
+def _scan_variant_name(height: float, interval: float) -> str:
+    height_label = _number_label(height)
+    if interval <= 0:
+        return f"h{height_label}_unmeasured"
+    return f"h{height_label}_dt{_number_label(interval)}"
+
+
+def _number_label(value: float) -> str:
+    return f"{value:g}".replace("-", "m").replace(".", "p")

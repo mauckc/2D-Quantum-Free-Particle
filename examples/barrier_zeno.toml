@@ -21,10 +21,17 @@ dt = 0.002
 tf = 1.2
 frame_interval = 0.03
 
+[boundary]
+kind = "absorbing"
+width = 1.0
+strength = 4.0
+power = 2.0
+
 [measurement]
 kind = "zeno"
 interval = 0.12
+detector_buffer = 0.25
 
 [output]
 fps = 20
-render_video = true
+render_video = false

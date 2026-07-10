@@ -46,36 +46,55 @@ def _run_single_wavefunction(config: ExperimentConfig) -> ExperimentResult:
     grid = make_grid(config.grid)
     potential = build_potential(config.potential, grid)
     psi = gaussian_packet(config.wave_packet, grid)
-    solver = SplitStepSolver(grid, potential, config.solver)
-    mask = transmission_mask(config.potential, grid)
-    masks = {"transmission": mask, "non_transmission": ~mask}
+    solver = SplitStepSolver(grid, potential, config.solver, config.boundary)
+    transmission = transmission_mask(config.potential, grid)
+    detector = _detector_mask(config, grid)
+    boundary = solver.absorber_mask < 0.999999
+    masks = {
+        "transmission": transmission,
+        "detector": detector,
+        "non_detector": ~detector,
+        "absorbing_boundary": boundary,
+    }
 
     frames: list[ComplexArray] = [psi.copy()]
     times: list[float] = [0.0]
     norm_series: list[float] = [norm(psi, grid)]
-    transmission_series: list[float] = [_probability_in_mask(psi, grid, mask)]
+    transmission_series: list[float] = [_probability_in_mask(psi, grid, transmission)]
+    unconditional_transmission_series: list[float] = [transmission_series[-1]]
     detected_series: list[float] = [0.0]
+    absorbed_series: list[float] = [0.0]
     survival_series: list[float] = [1.0]
     survival_weight = 1.0
     detected_probability = 0.0
+    absorbed_probability = 0.0
     next_measurement = _first_measurement_time(config)
 
     for step in range(1, solver.step_count + 1):
-        psi = solver.step(psi)
+        step_result = solver.step_with_diagnostics(psi)
+        psi = step_result.psi
         time = step * config.solver.dt
 
+        if step_result.absorbed_probability > 0:
+            absorbed_probability += survival_weight * step_result.absorbed_probability
+            survival_weight *= max(0.0, 1.0 - step_result.absorbed_probability)
+            if norm(psi, grid) > 0:
+                psi = normalize(psi, grid)
+
         if _measurement_due(config, time, next_measurement):
-            transmitted = _probability_in_mask(psi, grid, mask)
+            transmitted = _probability_in_mask(psi, grid, detector)
             detected_probability += survival_weight * transmitted
             survival_weight *= max(0.0, 1.0 - transmitted)
-            psi = np.where(mask, 0.0, psi)
+            psi = np.where(detector, 0.0, psi)
             if norm(psi, grid) > 0:
                 psi = normalize(psi, grid)
             next_measurement += config.measurement.interval or config.solver.tf
 
         norm_series.append(norm(psi, grid))
-        transmission_series.append(_probability_in_mask(psi, grid, mask))
+        transmission_series.append(_probability_in_mask(psi, grid, transmission))
+        unconditional_transmission_series.append(survival_weight * transmission_series[-1])
         detected_series.append(detected_probability)
+        absorbed_series.append(absorbed_probability)
         survival_series.append(survival_weight)
         if step % solver.frame_stride == 0 or step == solver.step_count:
             frames.append(psi.copy())
@@ -88,7 +107,11 @@ def _run_single_wavefunction(config: ExperimentConfig) -> ExperimentResult:
         * config.solver.dt,
         "norm": np.asarray(norm_series, dtype=np.float64),
         "transmission_probability": np.asarray(transmission_series, dtype=np.float64),
+        "unconditional_transmission_probability": np.asarray(
+            unconditional_transmission_series, dtype=np.float64
+        ),
         "detected_probability": np.asarray(detected_series, dtype=np.float64),
+        "absorbed_probability": np.asarray(absorbed_series, dtype=np.float64),
         "survival_weight": np.asarray(survival_series, dtype=np.float64),
     }
     metrics = _base_metrics(config, grid, arrays)
@@ -96,8 +119,13 @@ def _run_single_wavefunction(config: ExperimentConfig) -> ExperimentResult:
         {
             "final_norm": float(norm_series[-1]),
             "final_transmission_probability": float(transmission_series[-1]),
+            "final_unconditional_transmission_probability": float(
+                unconditional_transmission_series[-1]
+            ),
             "final_detected_probability": float(detected_series[-1]),
+            "final_absorbed_probability": float(absorbed_series[-1]),
             "final_survival_weight": float(survival_series[-1]),
+            "detector_x": float(_detector_x(config)),
         }
     )
     return ExperimentResult(config, grid, potential, masks, arrays, metrics)
@@ -107,7 +135,7 @@ def _run_double_slit(config: ExperimentConfig) -> ExperimentResult:
     grid = make_grid(config.grid)
     potential = build_potential(config.potential, grid)
     psi = gaussian_packet(config.wave_packet, grid)
-    solver = SplitStepSolver(grid, potential, config.solver)
+    solver = SplitStepSolver(grid, potential, config.solver, config.boundary)
     transmission = transmission_mask(config.potential, grid)
     upper_slit = upper_slit_mask(config.potential, grid)
     lower_slit = lower_slit_mask(config.potential, grid)
@@ -215,6 +243,17 @@ def _which_path_time(config: ExperimentConfig) -> float:
 
 def _probability_in_mask(psi: ComplexArray, grid: Grid, mask: BoolArray) -> float:
     return integrate_probability(np.where(mask, np.abs(psi) ** 2, 0.0), grid)
+
+
+def _detector_mask(config: ExperimentConfig, grid: Grid) -> BoolArray:
+    return grid.X >= _detector_x(config)
+
+
+def _detector_x(config: ExperimentConfig) -> float:
+    if config.measurement.detector_x is not None:
+        return config.measurement.detector_x
+    barrier_right_edge = config.potential.barrier_x + config.potential.barrier_width / 2.0
+    return barrier_right_edge + config.measurement.detector_buffer
 
 
 def _screen_profile(probability: FloatArray, transmission: BoolArray) -> FloatArray:

@@ -1,0 +1,6 @@
+name = "zeno_research_sweep"
+base_config = "barrier_zeno.toml"
+
+[scan]
+potential_heights = [25.0, 40.0, 60.0]
+measurement_intervals = [0.0, 0.24, 0.12, 0.06]
