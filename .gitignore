@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+build/
+dist/
+*.egg-info/
+
+runs/
+reports/
+outfields/
+visualization/figures/prob2D_*.png
+visualization/output-prob2D.mp4

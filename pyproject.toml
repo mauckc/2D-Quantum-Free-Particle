@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "quantum-dynamics-lab"
+version = "0.1.0"
+description = "Reproducible 2D quantum dynamics experiments with a NumPy split-step solver."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+dependencies = [
+    "matplotlib>=3.8",
+    "numpy>=2.0",
+]
+
+[project.scripts]
+quantum-lab = "quantum_dynamics_lab.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

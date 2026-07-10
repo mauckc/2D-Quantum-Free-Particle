@@ -1,0 +1,26 @@
+name = "free_packet"
+experiment = "free_packet"
+
+[grid]
+n = 48
+length = 10.0
+
+[wave_packet]
+center = [-2.0, -0.5]
+sigma = 0.5
+momentum = [3.0, 1.0]
+
+[potential]
+kind = "free"
+
+[solver]
+dt = 0.002
+tf = 0.2
+frame_interval = 0.02
+
+[measurement]
+kind = "none"
+
+[output]
+fps = 20
+render_video = false
