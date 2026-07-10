@@ -19,6 +19,7 @@ uv run quantum-lab compare examples/zeno_sweep.toml --out reports/zeno_sweep
 uv run quantum-lab compare examples/zeno_research_sweep.toml --out reports/zeno_research_sweep
 uv run quantum-lab run examples/double_slit.toml --out runs/double_slit
 uv run quantum-lab narrative --zeno reports/zeno_research_sweep --double-slit runs/double_slit/run.npz --out reports/research_narrative
+uv run quantum-lab validate examples/validation_suite.toml --out reports/validation_suite
 uv run quantum-lab render runs/free_packet/run.npz --out reports/free_packet
 ```
 
@@ -51,6 +52,11 @@ Optional FFT backends can be selected in `[solver]` with `backend = "numpy"`,
 installed and otherwise falls back to NumPy; CuPy and pyFFTW remain optional
 dependencies. Install them with `uv sync --extra fftw` or
 `uv sync --extra cuda12` when the local machine supports those runtimes.
+
+The validation workflow writes `validation_metrics.json`,
+`validation_report.md`, `validation_report.html`, and `validation_summary.png`.
+It checks norm conservation, free Gaussian dispersion, barrier transmission
+trends, Zeno no-click transmission trends, and optional backend parity.
 
 ---
 
