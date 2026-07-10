@@ -117,6 +117,7 @@ def _run_single_wavefunction(config: ExperimentConfig) -> ExperimentResult:
     metrics = _base_metrics(config, grid, arrays)
     metrics.update(
         {
+            "backend": solver.backend_name,
             "final_norm": float(norm_series[-1]),
             "final_transmission_probability": float(transmission_series[-1]),
             "final_unconditional_transmission_probability": float(
@@ -202,6 +203,7 @@ def _run_double_slit(config: ExperimentConfig) -> ExperimentResult:
     metrics = _base_metrics(config, grid, arrays)
     metrics.update(
         {
+            "backend": solver.backend_name,
             "final_norm": float(norm_series[-1]),
             "final_which_path_norm": float(which_path_norm_series[-1]),
             "coherent_interference_contrast": float(contrast_coherent),

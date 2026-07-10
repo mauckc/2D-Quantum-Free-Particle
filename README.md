@@ -17,6 +17,8 @@ uv run quantum-lab run examples/free_packet.toml --out runs/free_packet
 uv run quantum-lab run examples/barrier_zeno.toml --out runs/barrier_zeno
 uv run quantum-lab compare examples/zeno_sweep.toml --out reports/zeno_sweep
 uv run quantum-lab compare examples/zeno_research_sweep.toml --out reports/zeno_research_sweep
+uv run quantum-lab run examples/double_slit.toml --out runs/double_slit
+uv run quantum-lab narrative --zeno reports/zeno_research_sweep --double-slit runs/double_slit/run.npz --out reports/research_narrative
 uv run quantum-lab render runs/free_packet/run.npz --out reports/free_packet
 ```
 
@@ -43,6 +45,12 @@ conditional wavefunction, and the no-click branch is renormalized while
 survival weight tracks the unconditional probability. Generated comparison
 reports include `comparison.csv`, `comparison.png`, `zeno_transmission_heatmap.png`,
 and `report.md`.
+
+Optional FFT backends can be selected in `[solver]` with `backend = "numpy"`,
+`"pyfftw"`, `"cupy"`, or `"auto"`. The default `auto` uses pyFFTW when it is
+installed and otherwise falls back to NumPy; CuPy and pyFFTW remain optional
+dependencies. Install them with `uv sync --extra fftw` or
+`uv sync --extra cuda12` when the local machine supports those runtimes.
 
 ---
 

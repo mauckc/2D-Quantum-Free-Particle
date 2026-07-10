@@ -48,7 +48,7 @@ def write_metrics(path: str | Path, metrics: dict[str, Any]) -> None:
 
 def _metadata(result: ExperimentResult) -> dict[str, Any]:
     return {
-        "backend": "numpy",
+        "backend": str(result.metrics.get("backend", "numpy")),
         "config": result.config.to_dict(),
         "created_at": datetime.now(UTC).isoformat(),
         "git_commit": _git_commit(),

@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 import csv
+import html
+import json
 import shutil
 
 import matplotlib
@@ -12,6 +14,52 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.animation import FFMpegWriter
 import numpy as np
+
+
+def render_research_narrative(
+    zeno_dir: str | Path, double_slit_run: str | Path, out_dir: str | Path
+) -> dict[str, Path]:
+    from .artifacts import load_run
+
+    zeno_dir = Path(zeno_dir)
+    double_slit_run = Path(double_slit_run)
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    rows = _read_comparison_csv(zeno_dir / "comparison.csv")
+    double_data = load_run(double_slit_run)
+    double_metrics_path = double_slit_run.parent / "metrics.json"
+    double_metrics = (
+        json.loads(double_metrics_path.read_text(encoding="utf-8"))
+        if double_metrics_path.exists()
+        else {}
+    )
+    zeno_comparison = _copy_if_exists(zeno_dir / "comparison.png", out_dir / "zeno_comparison.png")
+    zeno_heatmap = _copy_if_exists(
+        zeno_dir / "zeno_transmission_heatmap.png",
+        out_dir / "zeno_transmission_heatmap.png",
+    )
+    double_summary = _copy_if_exists(
+        double_slit_run.parent / "summary.png", out_dir / "double_slit_summary.png"
+    )
+
+    narrative_path = _write_full_research_narrative(
+        rows=rows,
+        zeno_comparison=zeno_comparison,
+        zeno_heatmap=zeno_heatmap,
+        double_summary=double_summary,
+        double_config=double_data["metadata"]["config"],
+        double_metrics=double_metrics,
+        path=out_dir / "research_narrative.md",
+    )
+    html_path = _write_html_from_markdown(narrative_path, out_dir / "research_narrative.html")
+    return {"narrative": narrative_path, "html": html_path}
+
+
+def _copy_if_exists(source: Path, destination: Path) -> Path:
+    if source.exists():
+        shutil.copy2(source, destination)
+    return destination
 
 
 def render_run(run_path: str | Path, out_dir: str | Path | None = None) -> dict[str, Path]:
@@ -25,6 +73,9 @@ def render_run(run_path: str | Path, out_dir: str | Path | None = None) -> dict[
     outputs["potential"] = _plot_potential(data, out_dir / "potential.png")
     outputs["summary"] = _plot_summary(data, out_dir / "summary.png")
     outputs["report"] = _write_run_report(data, outputs, out_dir / "report.md")
+    outputs["html_report"] = _write_html_from_markdown(
+        outputs["report"], out_dir / "report.html"
+    )
     if data["metadata"]["config"]["output"].get("render_video", True):
         video = _render_video(data, out_dir / "probability.mp4")
         if video is not None:
@@ -78,7 +129,11 @@ def render_comparison(run_dirs: list[Path], out_dir: str | Path) -> Path:
     fig.savefig(path, dpi=160)
     plt.close(fig)
     heatmap_path = _plot_transmission_heatmap(rows, out_dir / "zeno_transmission_heatmap.png")
-    _write_comparison_report(rows, path, heatmap_path, out_dir / "report.md")
+    report_path = _write_comparison_report(rows, path, heatmap_path, out_dir / "report.md")
+    _write_html_from_markdown(report_path, out_dir / "report.html")
+    _write_explorer(rows, out_dir / "explorer.html")
+    _write_research_narrative(rows, path, heatmap_path, out_dir / "research_narrative.md")
+    _write_html_from_markdown(out_dir / "research_narrative.md", out_dir / "research_narrative.html")
     return path
 
 
@@ -254,6 +309,22 @@ def _write_comparison_csv(rows: list[dict[str, float | str | None]], path: Path)
         writer.writerows(rows)
 
 
+def _read_comparison_csv(path: Path) -> list[dict[str, float | str | None]]:
+    rows: list[dict[str, float | str | None]] = []
+    with path.open(newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            parsed: dict[str, float | str | None] = {"name": row["name"]}
+            for key, value in row.items():
+                if key == "name":
+                    continue
+                if value == "":
+                    parsed[key] = None
+                else:
+                    parsed[key] = float(value)
+            rows.append(parsed)
+    return rows
+
+
 def _detector_x_from_config(config: dict[str, Any]) -> float:
     measurement = config["measurement"]
     if measurement.get("detector_x") is not None:
@@ -369,5 +440,259 @@ def _write_comparison_report(
             "",
         ]
     )
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
+
+
+def _write_html_from_markdown(markdown_path: Path, html_path: Path) -> Path:
+    markdown = markdown_path.read_text(encoding="utf-8")
+    body = _simple_markdown_to_html(markdown)
+    html_text = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{html.escape(markdown_path.stem.replace('_', ' ').title())}</title>
+  <style>
+    body {{ font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.5; max-width: 1080px; margin: 2rem auto; padding: 0 1rem; color: #17202a; }}
+    h1, h2 {{ line-height: 1.2; }}
+    img {{ max-width: 100%; height: auto; border: 1px solid #d6dbe0; }}
+    table {{ border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; }}
+    th, td {{ border: 1px solid #d6dbe0; padding: 0.45rem 0.6rem; text-align: right; }}
+    th:first-child, td:first-child {{ text-align: left; }}
+    code {{ background: #f1f3f5; padding: 0.1rem 0.25rem; border-radius: 4px; }}
+  </style>
+</head>
+<body>
+{body}
+</body>
+</html>
+"""
+    html_path.write_text(html_text, encoding="utf-8")
+    return html_path
+
+
+def _simple_markdown_to_html(markdown: str) -> str:
+    lines = markdown.splitlines()
+    output: list[str] = []
+    table: list[str] = []
+    in_list = False
+    for line in lines:
+        if table and not line.startswith("|"):
+            output.append(_table_to_html(table))
+            table = []
+        if in_list and not line.startswith("- "):
+            output.append("</ul>")
+            in_list = False
+        if line.startswith("|"):
+            table.append(line)
+        elif line.startswith("# "):
+            output.append(f"<h1>{html.escape(line[2:])}</h1>")
+        elif line.startswith("## "):
+            output.append(f"<h2>{html.escape(line[3:])}</h2>")
+        elif line.startswith("![") and "](" in line and line.endswith(")"):
+            alt, src = line[2:-1].split("](", 1)
+            output.append(f'<p><img src="{html.escape(src)}" alt="{html.escape(alt)}"></p>')
+        elif line.startswith("- "):
+            if not in_list:
+                output.append("<ul>")
+                in_list = True
+            output.append(f"<li>{_inline_markdown(line[2:])}</li>")
+        elif not line.strip():
+            output.append("")
+        else:
+            output.append(f"<p>{_inline_markdown(line)}</p>")
+    if table:
+        output.append(_table_to_html(table))
+    if in_list:
+        output.append("</ul>")
+    return "\n".join(output)
+
+
+def _table_to_html(lines: list[str]) -> str:
+    rows = []
+    for index, line in enumerate(lines):
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if index == 1 and all(set(cell) <= {"-", ":"} for cell in cells):
+            continue
+        tag = "th" if index == 0 else "td"
+        rows.append("<tr>" + "".join(f"<{tag}>{_inline_markdown(cell)}</{tag}>" for cell in cells) + "</tr>")
+    return "<table>\n" + "\n".join(rows) + "\n</table>"
+
+
+def _inline_markdown(text: str) -> str:
+    escaped = html.escape(text)
+    parts = escaped.split("`")
+    for index in range(1, len(parts), 2):
+        parts[index] = f"<code>{parts[index]}</code>"
+    return "".join(parts)
+
+
+def _write_explorer(rows: list[dict[str, float | str | None]], path: Path) -> Path:
+    data = json.dumps(rows)
+    heights = sorted({float(row["barrier_height"]) for row in rows})
+    intervals = sorted({float(row["interval_sort"]) for row in rows})
+    html_text = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zeno Parameter Explorer</title>
+  <style>
+    body {{ font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 2rem auto; max-width: 980px; padding: 0 1rem; color: #17202a; }}
+    .controls {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.5rem 0; }}
+    label {{ display: grid; gap: 0.35rem; font-weight: 600; }}
+    select {{ font: inherit; padding: 0.4rem; }}
+    .metrics {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; }}
+    .metric {{ border: 1px solid #d6dbe0; padding: 0.8rem; }}
+    .metric span {{ display: block; font-size: 0.85rem; color: #52616f; }}
+    .metric strong {{ font-size: 1.35rem; }}
+    table {{ width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.9rem; }}
+    th, td {{ border: 1px solid #d6dbe0; padding: 0.45rem; text-align: right; }}
+    th:first-child, td:first-child {{ text-align: left; }}
+  </style>
+</head>
+<body>
+  <h1>Zeno Parameter Explorer</h1>
+  <p>Inspect how barrier height and measurement interval change no-click transmission, detector clicks, survival weight, and boundary absorption.</p>
+  <div class="controls">
+    <label>Barrier height<select id="height"></select></label>
+    <label>Measurement interval<select id="interval"></select></label>
+  </div>
+  <div class="metrics" id="metrics"></div>
+  <table id="table"></table>
+  <script>
+    const rows = {data};
+    const heights = {json.dumps(heights)};
+    const intervals = {json.dumps(intervals)};
+    const heightSelect = document.querySelector("#height");
+    const intervalSelect = document.querySelector("#interval");
+    const metrics = document.querySelector("#metrics");
+    const table = document.querySelector("#table");
+    for (const value of heights) heightSelect.add(new Option(value, value));
+    for (const value of intervals) intervalSelect.add(new Option(value === 0 ? "unmeasured" : value, value));
+    function selectedRow() {{
+      return rows.find(row => Number(row.barrier_height) === Number(heightSelect.value) && Number(row.interval_sort) === Number(intervalSelect.value));
+    }}
+    function fmt(value) {{ return Number(value).toFixed(6); }}
+    function render() {{
+      const row = selectedRow();
+      metrics.innerHTML = "";
+      for (const [label, key] of [
+        ["No-click transmission", "unconditional_transmission_probability"],
+        ["Detector clicks", "detected_probability"],
+        ["No-click survival", "survival_weight"],
+        ["Boundary absorption", "absorbed_probability"],
+      ]) {{
+        const div = document.createElement("div");
+        div.className = "metric";
+        div.innerHTML = `<span>${{label}}</span><strong>${{fmt(row[key])}}</strong>`;
+        metrics.appendChild(div);
+      }}
+      table.innerHTML = `<tr><th>Run</th><th>V0</th><th>interval</th><th>detector x</th><th>unconditional transmission</th><th>detector clicks</th><th>absorbed</th><th>survival</th></tr>` +
+        rows.map(r => `<tr><td>${{r.name}}</td><td>${{r.barrier_height}}</td><td>${{r.interval ?? "unmeasured"}}</td><td>${{fmt(r.detector_x)}}</td><td>${{fmt(r.unconditional_transmission_probability)}}</td><td>${{fmt(r.detected_probability)}}</td><td>${{fmt(r.absorbed_probability)}}</td><td>${{fmt(r.survival_weight)}}</td></tr>`).join("");
+    }}
+    heightSelect.addEventListener("change", render);
+    intervalSelect.addEventListener("change", render);
+    render();
+  </script>
+</body>
+</html>
+"""
+    path.write_text(html_text, encoding="utf-8")
+    return path
+
+
+def _write_research_narrative(
+    rows: list[dict[str, float | str | None]], comparison: Path, heatmap: Path, path: Path
+) -> Path:
+    unmeasured = [row for row in rows if row["interval"] is None]
+    measured = [row for row in rows if row["interval"] is not None]
+    strongest = min(measured, key=lambda row: float(row["unconditional_transmission_probability"]))
+    weakest_barrier = max(unmeasured, key=lambda row: float(row["unconditional_transmission_probability"]))
+    lines = [
+        "# Reproducible Zeno Barrier Narrative",
+        "",
+        "## Question",
+        "",
+        "Can repeated no-click observation suppress transmission of a Gaussian wave packet through a finite barrier on a two-dimensional lattice?",
+        "",
+        "## Method",
+        "",
+        "Each run evolves the same packet with a split-step Fourier method. The sweep varies barrier height and measurement interval. Measurements are modeled as no-click projections at a detector region to the right of the barrier, while absorbing boundaries track probability that reaches the edge of the simulation box.",
+        "",
+        "## Figures",
+        "",
+        f"![Comparison]({comparison.name})",
+        "",
+        f"![No-click transmission heatmap]({heatmap.name})",
+        "",
+        "## Result",
+        "",
+        f"The largest unmeasured no-click transmission in this sweep is {float(weakest_barrier['unconditional_transmission_probability']):.6f} for `{weakest_barrier['name']}`. The strongest suppression among measured runs leaves {float(strongest['unconditional_transmission_probability']):.6f} unconditional no-click transmission for `{strongest['name']}`.",
+        "",
+        "## Assumptions",
+        "",
+        "- Periodic FFT evolution is combined with an optional absorbing edge mask to reduce wraparound artifacts.",
+        "- Detector clicks are accumulated separately from boundary absorption.",
+        "- The Zeno signal is interpreted through unconditional no-click branch transmission, not cumulative detector-click probability alone.",
+        "- The generated figures and CSV are reproducible from the committed TOML configs and the `quantum-lab compare` command.",
+        "",
+    ]
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
+
+
+def _write_full_research_narrative(
+    rows: list[dict[str, float | str | None]],
+    zeno_comparison: Path,
+    zeno_heatmap: Path,
+    double_summary: Path,
+    double_config: dict[str, Any],
+    double_metrics: dict[str, Any],
+    path: Path,
+) -> Path:
+    measured = [row for row in rows if row["interval"] is not None]
+    unmeasured = [row for row in rows if row["interval"] is None]
+    strongest = min(measured, key=lambda row: float(row["unconditional_transmission_probability"]))
+    baseline = max(unmeasured, key=lambda row: float(row["unconditional_transmission_probability"]))
+    coherent = float(double_metrics.get("coherent_interference_contrast", 0.0))
+    which_path = float(double_metrics.get("which_path_interference_contrast", 0.0))
+    lines = [
+        "# 2D Quantum Dynamics Research Narrative",
+        "",
+        "## Research Questions",
+        "",
+        "1. Does repeated no-click observation suppress barrier transmission on a two-dimensional lattice?",
+        "2. Does which-path projection reduce double-slit interference contrast?",
+        "",
+        "## Reproducible Inputs",
+        "",
+        "- Zeno sweep CSV: `comparison.csv`",
+        f"- Double-slit run: `{double_config['name']}`",
+        f"- Double-slit grid: {double_config['grid']['n']} x {double_config['grid']['n']}, L={double_config['grid']['length']}",
+        "",
+        "## Zeno Barrier Result",
+        "",
+        f"The unmeasured baseline with the largest transmission is `{baseline['name']}` with unconditional transmission {float(baseline['unconditional_transmission_probability']):.6f}. The strongest measured suppression is `{strongest['name']}` with unconditional no-click transmission {float(strongest['unconditional_transmission_probability']):.6f}.",
+        "",
+        f"![Zeno comparison]({zeno_comparison.name})",
+        "",
+        f"![Zeno heatmap]({zeno_heatmap.name})",
+        "",
+        "## Double-Slit Result",
+        "",
+        f"The coherent screen-profile contrast is {coherent:.6f}; the which-path contrast is {which_path:.6f}. Lower which-path contrast is consistent with measurement suppressing interference structure in the branch-combined probability.",
+        "",
+        f"![Double-slit summary]({double_summary.name})",
+        "",
+        "## Assumptions And Limits",
+        "",
+        "- The solver uses a split-step Fourier method and optional FFT backends; numerical behavior should be checked when changing backend or grid resolution.",
+        "- Absorbing edges reduce wraparound but introduce a boundary-loss diagnostic that should remain small enough for the intended interpretation.",
+        "- The Zeno analysis focuses on unconditional no-click branch transmission rather than raw cumulative detector clicks.",
+        "- The double-slit comparison is an operational which-path projection model, not a full detector-environment model.",
+        "",
+    ]
     path.write_text("\n".join(lines), encoding="utf-8")
     return path

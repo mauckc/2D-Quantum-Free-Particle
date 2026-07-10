@@ -14,6 +14,10 @@ dependencies = [
     "numpy>=2.0",
 ]
 
+[project.optional-dependencies]
+fftw = ["pyfftw>=0.15"]
+cuda12 = ["cupy-cuda12x>=13"]
+
 [project.scripts]
 quantum-lab = "quantum_dynamics_lab.cli:main"
 

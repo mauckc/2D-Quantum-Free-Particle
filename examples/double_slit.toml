@@ -28,4 +28,4 @@ kind = "which_path"
 
 [output]
 fps = 20
-render_video = true
+render_video = false

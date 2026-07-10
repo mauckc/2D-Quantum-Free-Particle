@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import cached_property
 
 import numpy as np
 from numpy.typing import NDArray
 
+from .backends import FFTBackend, create_backend
 from .config import BoundaryConfig, SolverConfig
 from .grid import Grid, norm
 
@@ -25,6 +27,7 @@ class SplitStepSolver:
     potential: FloatArray
     config: SolverConfig
     boundary: BoundaryConfig = BoundaryConfig()
+    backend: FFTBackend | None = None
 
     def __post_init__(self) -> None:
         if self.config.dt <= 0:
@@ -50,6 +53,16 @@ class SplitStepSolver:
     def frame_stride(self) -> int:
         return max(1, int(round(self.config.frame_interval / self.config.dt)))
 
+    @cached_property
+    def fft_backend(self) -> FFTBackend:
+        if self.backend is not None:
+            return self.backend
+        return create_backend(self.config.backend)
+
+    @property
+    def backend_name(self) -> str:
+        return self.fft_backend.name
+
     def step(self, psi: ComplexArray) -> ComplexArray:
         return self.step_with_diagnostics(psi).psi
 
@@ -60,7 +73,8 @@ class SplitStepSolver:
         position_half = np.exp(-0.5j * self.potential * dt / hbar)
         kinetic = np.exp(-1j * hbar * self.grid.k2 * dt / (2.0 * mass))
         psi = position_half * psi
-        psi = np.fft.ifft2(np.fft.fft2(psi) * kinetic)
+        backend = self.fft_backend
+        psi = backend.ifft2(backend.fft2(psi) * kinetic)
         psi = (position_half * psi).astype(np.complex128)
         before_absorber = norm(psi, self.grid)
         psi = self.absorber_mask * psi
