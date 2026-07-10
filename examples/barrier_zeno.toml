@@ -1,0 +1,30 @@
+name = "barrier_zeno"
+experiment = "barrier_zeno"
+
+[grid]
+n = 64
+length = 10.0
+
+[wave_packet]
+center = [-3.0, 0.0]
+sigma = 0.45
+momentum = [5.0, 0.0]
+
+[potential]
+kind = "barrier"
+height = 40.0
+barrier_x = 0.0
+barrier_width = 0.25
+
+[solver]
+dt = 0.002
+tf = 1.2
+frame_interval = 0.03
+
+[measurement]
+kind = "zeno"
+interval = 0.12
+
+[output]
+fps = 20
+render_video = true

@@ -1,0 +1,16 @@
+name = "zeno_sweep"
+base_config = "barrier_zeno.toml"
+
+[[variants]]
+name = "unmeasured"
+measurement_kind = "none"
+
+[[variants]]
+name = "slow_measurement"
+measurement_kind = "zeno"
+measurement_interval = 0.24
+
+[[variants]]
+name = "fast_measurement"
+measurement_kind = "zeno"
+measurement_interval = 0.06

@@ -1,5 +1,41 @@
 # 2D-Quantum-Free-Particle
 
+## 2D Quantum Dynamics Lab
+
+This repository now includes a maintained Python package for reproducible
+2D quantum dynamics experiments. The original C++/Python/GPU scripts remain
+in place as legacy reference material from the Scientific Computing Capstone
+project, while the new `quantum-dynamics-lab` package is the recommended path
+for new runs.
+
+### Quick start with uv
+
+```bash
+uv sync --dev
+uv run pytest
+uv run quantum-lab run examples/free_packet.toml --out runs/free_packet
+uv run quantum-lab run examples/barrier_zeno.toml --out runs/barrier_zeno
+uv run quantum-lab compare examples/zeno_sweep.toml --out reports/zeno_sweep
+uv run quantum-lab render runs/free_packet/run.npz --out reports/free_packet
+```
+
+The new solver uses a NumPy Strang split-step Fourier method with periodic
+FFT boundaries, normalized Gaussian wave packets, configurable potentials, and
+static report generation. Run artifacts are saved as compressed `.npz` files
+with companion `metrics.json`, `summary.png`, `potential.png`, and, when
+enabled and FFmpeg is available, `probability.mp4`.
+
+Supported v1 experiments:
+
+- free packet propagation
+- barrier tunneling with repeated Zeno-style projection measurements
+- coherent versus which-path double-slit propagation
+
+The maintained implementation lives in `src/quantum_dynamics_lab/`; example
+experiment configs live in `examples/`; tests live in `tests/`.
+
+---
+
 The mechanics of quantum free particles can be hard to study tangibly. With scientific computing, we are able to build a numerically stable simulation environment to test out models.
 
 This program numerically integrates the Schrodinger equation on finite complex scalar fields for simulating interactions of quantum particles under varied observation.
