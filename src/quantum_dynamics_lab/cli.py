@@ -6,7 +6,7 @@ import argparse
 from .artifacts import save_run, write_metrics
 from .config import apply_sweep_variant, load_experiment_config, load_sweep_config
 from .experiments import run_experiment
-from .render import render_comparison, render_run
+from .render import render_comparison, render_research_narrative, render_run
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -26,6 +26,13 @@ def main(argv: list[str] | None = None) -> int:
     compare_parser.add_argument("config", type=Path)
     compare_parser.add_argument("--out", type=Path, required=True)
     compare_parser.add_argument("--skip-render", action="store_true")
+
+    narrative_parser = subparsers.add_parser(
+        "narrative", help="Build a research narrative from generated artifacts"
+    )
+    narrative_parser.add_argument("--zeno", type=Path, required=True)
+    narrative_parser.add_argument("--double-slit", type=Path, required=True)
+    narrative_parser.add_argument("--out", type=Path, required=True)
 
     args = parser.parse_args(argv)
     if args.command == "run":
@@ -57,6 +64,10 @@ def main(argv: list[str] | None = None) -> int:
         if not args.skip_render:
             render_comparison(run_dirs, args.out)
         write_metrics(args.out / "metrics.json", summary)
+        print(args.out)
+        return 0
+    if args.command == "narrative":
+        render_research_narrative(args.zeno, args.double_slit, args.out)
         print(args.out)
         return 0
     return 2

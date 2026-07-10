@@ -37,6 +37,7 @@ class SolverConfig:
     frame_interval: float = 0.02
     hbar: float = 1.0
     mass: float = 1.0
+    backend: str = "auto"
 
 
 @dataclass(frozen=True)
@@ -149,6 +150,7 @@ def load_experiment_config(path: str | Path) -> ExperimentConfig:
         ),
         hbar=float(solver_data.get("hbar", SolverConfig.hbar)),
         mass=float(solver_data.get("mass", SolverConfig.mass)),
+        backend=str(solver_data.get("backend", SolverConfig.backend)),
     )
     boundary = BoundaryConfig(
         kind=str(boundary_data.get("kind", BoundaryConfig.kind)),

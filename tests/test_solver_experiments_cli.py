@@ -1,7 +1,11 @@
 from __future__ import annotations
 
-import numpy as np
+import importlib.util
 
+import numpy as np
+import pytest
+
+from quantum_dynamics_lab.backends import create_backend
 from quantum_dynamics_lab.cli import main
 from quantum_dynamics_lab.config import (
     BoundaryConfig,
@@ -50,6 +54,16 @@ def test_plane_wave_accumulates_expected_free_phase() -> None:
 
     assert np.max(np.abs(evolved - expected)) < 1e-12
     assert np.isclose(norm(evolved, grid), 1.0)
+
+
+def test_fft_backend_selection_and_missing_optional_errors() -> None:
+    assert create_backend("numpy").name == "numpy"
+    assert create_backend("auto").name in {"numpy", "pyfftw"}
+    if importlib.util.find_spec("cupy") is None:
+        with pytest.raises(RuntimeError, match="cupy is not installed"):
+            create_backend("cupy")
+    else:
+        assert create_backend("cupy").name == "cupy"
 
 
 def test_barrier_zeno_fast_measurement_reduces_detection() -> None:
@@ -146,6 +160,7 @@ def test_cli_run_and_render_smoke(tmp_path) -> None:
     assert (out / "report" / "summary.png").exists()
     assert (out / "report" / "potential.png").exists()
     assert (out / "report" / "report.md").exists()
+    assert (out / "report" / "report.html").exists()
 
 
 def test_research_sweep_scan_expands_variants() -> None:
@@ -217,3 +232,123 @@ measurement_intervals = [0.0, 0.08]
     assert (out / "comparison.png").exists()
     assert (out / "zeno_transmission_heatmap.png").exists()
     assert (out / "report.md").exists()
+    assert (out / "report.html").exists()
+    assert (out / "explorer.html").exists()
+    assert (out / "research_narrative.md").exists()
+
+
+def test_narrative_command_combines_zeno_and_double_slit(tmp_path) -> None:
+    zeno_base = tmp_path / "zeno_base.toml"
+    zeno_base.write_text(
+        """
+name = "small_zeno"
+experiment = "barrier_zeno"
+
+[grid]
+n = 24
+length = 8.0
+
+[wave_packet]
+center = [-2.0, 0.0]
+sigma = 0.45
+momentum = [4.0, 0.0]
+
+[potential]
+kind = "barrier"
+height = 30.0
+barrier_x = 0.0
+barrier_width = 0.25
+
+[solver]
+dt = 0.004
+tf = 0.12
+frame_interval = 0.04
+backend = "numpy"
+
+[measurement]
+kind = "zeno"
+interval = 0.08
+detector_buffer = 0.25
+
+[output]
+render_video = false
+""",
+        encoding="utf-8",
+    )
+    zeno_sweep = tmp_path / "zeno_sweep.toml"
+    zeno_sweep.write_text(
+        """
+name = "small_sweep"
+base_config = "zeno_base.toml"
+
+[scan]
+potential_heights = [30.0]
+measurement_intervals = [0.0, 0.08]
+""",
+        encoding="utf-8",
+    )
+    double_config = tmp_path / "double.toml"
+    double_config.write_text(
+        """
+name = "small_double"
+experiment = "double_slit"
+
+[grid]
+n = 24
+length = 8.0
+
+[wave_packet]
+center = [-2.0, 0.0]
+sigma = 0.45
+momentum = [4.0, 0.0]
+
+[potential]
+kind = "double_slit"
+height = 80.0
+barrier_x = 0.0
+barrier_width = 0.25
+slit_width = 0.45
+slit_separation = 1.1
+
+[solver]
+dt = 0.004
+tf = 0.12
+frame_interval = 0.04
+backend = "numpy"
+
+[measurement]
+kind = "which_path"
+
+[output]
+render_video = false
+""",
+        encoding="utf-8",
+    )
+    zeno_out = tmp_path / "zeno_report"
+    double_out = tmp_path / "double"
+    narrative_out = tmp_path / "narrative"
+
+    assert main(["compare", str(zeno_sweep), "--out", str(zeno_out)]) == 0
+    assert main(["run", str(double_config), "--out", str(double_out)]) == 0
+    assert (
+        main(
+            [
+                "narrative",
+                "--zeno",
+                str(zeno_out),
+                "--double-slit",
+                str(double_out / "run.npz"),
+                "--out",
+                str(narrative_out),
+            ]
+        )
+        == 0
+    )
+
+    narrative = (narrative_out / "research_narrative.md").read_text(encoding="utf-8")
+    assert "Zeno Barrier Result" in narrative
+    assert "Double-Slit Result" in narrative
+    assert (narrative_out / "research_narrative.html").exists()
+    assert (narrative_out / "zeno_comparison.png").exists()
+    assert (narrative_out / "zeno_transmission_heatmap.png").exists()
+    assert (narrative_out / "double_slit_summary.png").exists()
