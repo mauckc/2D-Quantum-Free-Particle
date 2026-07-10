@@ -7,6 +7,7 @@ from .artifacts import save_run, write_metrics
 from .config import apply_sweep_variant, load_experiment_config, load_sweep_config
 from .experiments import run_experiment
 from .render import render_comparison, render_research_narrative, render_run
+from .validation import load_validation_config, run_validation
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -33,6 +34,12 @@ def main(argv: list[str] | None = None) -> int:
     narrative_parser.add_argument("--zeno", type=Path, required=True)
     narrative_parser.add_argument("--double-slit", type=Path, required=True)
     narrative_parser.add_argument("--out", type=Path, required=True)
+
+    validate_parser = subparsers.add_parser(
+        "validate", help="Run physics validation benchmarks"
+    )
+    validate_parser.add_argument("config", type=Path)
+    validate_parser.add_argument("--out", type=Path, required=True)
 
     args = parser.parse_args(argv)
     if args.command == "run":
@@ -70,6 +77,11 @@ def main(argv: list[str] | None = None) -> int:
         render_research_narrative(args.zeno, args.double_slit, args.out)
         print(args.out)
         return 0
+    if args.command == "validate":
+        config = load_validation_config(args.config)
+        metrics = run_validation(config, args.out)
+        print(args.out)
+        return 0 if metrics["passed"] else 1
     return 2
 
 

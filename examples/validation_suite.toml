@@ -1,0 +1,38 @@
+name = "physics_validation_suite"
+
+[[norm_cases]]
+name = "norm_n32_dt002"
+n = 32
+dt = 0.002
+tf = 0.08
+tolerance = 1e-8
+
+[[norm_cases]]
+name = "norm_n48_dt0015"
+n = 48
+dt = 0.0015
+tf = 0.06
+tolerance = 1e-8
+
+[[dispersion_cases]]
+name = "free_gaussian_dispersion"
+n = 48
+dt = 0.0015
+tf = 0.12
+sigma = 0.7
+tolerance = 0.35
+
+[barrier_case]
+name = "barrier_height_sweep"
+heights = [20.0, 40.0, 60.0]
+tolerance = 1e-6
+
+[zeno_case]
+name = "zeno_interval_sweep"
+intervals = [0.0, 0.06, 0.12, 0.24]
+tolerance = 1e-6
+
+[backend_case]
+name = "backend_parity"
+backends = ["numpy", "pyfftw", "cupy"]
+tolerance = 1e-10
