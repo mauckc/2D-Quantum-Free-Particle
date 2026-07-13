@@ -33,12 +33,16 @@ uv sync --dev --extra ui
 uv run --extra ui streamlit run apps/streamlit_dashboard.py
 ```
 
-The dashboard provides parameter controls for free-packet and barrier/Zeno
-experiments, a saved-frame viewer for probability density and phase, norm and
-probability diagnostics, and access to the generated NPZ and report artifacts.
-Its validation workspace runs the same physics benchmarks as
-`quantum-lab validate` and displays their pass/fail results and convergence
-plots. Dashboard output is saved under `runs/dashboard/` and
+The dashboard provides parameter controls for free-packet, barrier/Zeno, and
+double-slit experiments, a saved-frame viewer for probability density and
+phase, norm and probability diagnostics, and access to the generated NPZ and
+report artifacts. Double-slit runs compare coherent and which-path densities,
+screen profiles, and interference contrast. The Zeno Sweep workspace runs a
+bounded grid of barrier heights and measurement intervals, including an
+unmeasured baseline, and generates the same CSV, heatmap, and HTML report used
+by the CLI comparison workflow. The validation workspace runs the same physics
+benchmarks as `quantum-lab validate` and displays their pass/fail results and
+convergence plots. Dashboard output is saved under `runs/dashboard/` and
 `reports/dashboard/`, which remain ignored by Git.
 
 The new solver uses a NumPy Strang split-step Fourier method with periodic
