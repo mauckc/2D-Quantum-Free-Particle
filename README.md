@@ -1,5 +1,11 @@
 # 2D-Quantum-Free-Particle
 
+> **Project direction:** this repository is being incrementally generalized into
+> a differentiable 2D wave inverse-design lab, with scalar photonics as the first
+> practical application. The existing quantum workflows remain supported during
+> the migration. See [ROADMAP.md](ROADMAP.md) for scope, milestones, and current
+> status.
+
 ## 2D Quantum Dynamics Lab
 
 This repository now includes a maintained Python package for reproducible
@@ -37,13 +43,15 @@ The dashboard provides parameter controls for free-packet, barrier/Zeno, and
 double-slit experiments, a saved-frame viewer for probability density and
 phase, norm and probability diagnostics, and access to the generated NPZ and
 report artifacts. Double-slit runs compare coherent and which-path densities,
-screen profiles, and interference contrast. The Zeno Sweep workspace runs a
-bounded grid of barrier heights and measurement intervals, including an
-unmeasured baseline, and generates the same CSV, heatmap, and HTML report used
-by the CLI comparison workflow. The validation workspace runs the same physics
-benchmarks as `quantum-lab validate` and displays their pass/fail results and
-convergence plots. Dashboard output is saved under `runs/dashboard/` and
-`reports/dashboard/`, which remain ignored by Git.
+screen profiles, and a global min/max screen-profile contrast. That contrast is
+a visualization and regression diagnostic; it has not been independently
+validated as a physical interference-visibility measurement. The Zeno Sweep
+workspace runs a bounded grid of barrier heights and measurement intervals,
+including an unmeasured baseline, and generates the same CSV, heatmap, and HTML
+report used by the CLI comparison workflow. The validation workspace runs the
+same numerical checks as `quantum-lab validate` and displays their pass/fail
+results and convergence plots. Dashboard output is saved under
+`runs/dashboard/` and `reports/dashboard/`, which remain ignored by Git.
 
 The new solver uses a NumPy Strang split-step Fourier method with periodic
 FFT boundaries, normalized Gaussian wave packets, configurable potentials, and
@@ -69,6 +77,11 @@ survival weight tracks the unconditional probability. Generated comparison
 reports include `comparison.csv`, `comparison.png`, `zeno_transmission_heatmap.png`,
 and `report.md`.
 
+This no-click projection is an algorithmic demonstration, not an independently
+validated open-system detector model. Its transmission trend is retained as a
+quantum v0.1 regression target; by itself it is not research evidence for the
+Quantum Zeno effect.
+
 Optional FFT backends can be selected in `[solver]` with `backend = "numpy"`,
 `"pyfftw"`, `"cupy"`, or `"auto"`. The default `auto` uses pyFFTW when it is
 installed and otherwise falls back to NumPy; CuPy and pyFFTW remain optional
@@ -77,30 +90,52 @@ dependencies. Install them with `uv sync --extra fftw` or
 
 The validation workflow writes `validation_metrics.json`,
 `validation_report.md`, `validation_report.html`, and `validation_summary.png`.
-It checks norm conservation, free Gaussian dispersion, barrier transmission
-trends, Zeno no-click transmission trends, and optional backend parity.
+It checks norm conservation, free Gaussian dispersion against the analytic
+width, qualitative barrier and no-click transmission trends, and optional
+backend parity. The norm and dispersion cases are numerical/analytic checks;
+the barrier and Zeno trend checks freeze current behavior without independently
+validating its physical interpretation. The separately reported double-slit
+contrast has the same regression-only status.
 
----
+## Legacy capstone implementation
+
+The material below describes the original C++/FFTW capstone implementation. It
+is retained as historical reference and is not the recommended interface for
+new runs.
 
 The mechanics of quantum free particles can be hard to study tangibly. With scientific computing, we are able to build a numerically stable simulation environment to test out models.
 
-This program numerically integrates the Schrodinger equation on finite complex scalar fields for simulating interactions of quantum particles under varied observation.
+This program numerically evolves the linear Schrodinger equation for a complex
+scalar wavefunction sampled on a finite, periodic grid.
 
-The goal: Can the Quantum-Zeno Effect a.k.a. the watch dog effect be modeled on an N-dimensional finite difference point lattice. The effects of repeated observation on a quantum wavefunction tend to resist the effects quantum tunneling.
+The original motivating question was whether repeated projection operations in
+a grid simulation could illustrate Zeno-like suppression of barrier
+transmission. The simulation is a demonstration model and does not establish
+the behavior of a physical measurement apparatus.
 
-This simulation is built with a 2D static potential field that the wave-function shares the same 2d xy space points.
+The static potential and wavefunction are sampled on the same two-dimensional
+Cartesian grid.
 
-The optimizations implemented with our work are geared toward removing the need to solve the non-linear term of the hamiltonian in traditional methods.  This frees the computational demand balance with accuracy (non-diverging data)
+Operator splitting applies the position-space potential phase and the
+momentum-space kinetic phase separately. The Hamiltonian implemented here is
+linear; there is no nonlinear Hamiltonian term being removed.
 
 ## About 2D Quantum Free Particle
 
-This version implements a second-order in time finite difference method known as the "split-step" Crank-Nicolson method. By calculating energy states using the hamiltonian in both position and momentum space, this program is able to achieve numerically stable integration, which is necessary for finite difference methods.
+The maintained Python package uses a second-order Strang split-step Fourier
+method: a half potential phase, a full spectral kinetic phase, and a second half
+potential phase. The legacy C++ loop shown below uses a first-order
+split-operator Fourier update with full potential and kinetic phases. Neither
+implementation is Crank-Nicolson, and the spatial Laplacian is handled
+spectrally rather than by finite differences.
 
-Each time-iteration, the program evolves the wave function in the position basis. Then we apply a Fourier transform to the wave function representation in position space to calculate the wave function representation in momentum space.
+Each legacy time step evolves the wavefunction in the position basis and then
+uses a Fourier transform to represent it in the momentum basis.
 
-Once the momentum space representation has been solved by FFTw we can evolve the non-linear term of the Hamiltonian in the momentum basis/phase-space.
+In the momentum basis, the FFTW implementation applies the kinetic-energy phase.
 
-The wavefunction in momentum space is finally reverse Fourier transformed back into position space in order to repeat this integration scheme at the next time step t + dt
+The wavefunction is finally inverse transformed to position space before the
+next time step.
 
 <p align="center">
 <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/larger-output-quantum.gif"/>
@@ -144,17 +179,9 @@ so that we have our momentum operator defined by:
 <img src="https://latex.codecogs.com/gif.latex?%5Chat%7Bp%7D%7E%3D%7E-i%5Chbar%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20x%7D%7E."/>
 </p>
 
- This version implements a "split-step" Crank-Nicolson method
- We evolve our wave function in the position basis.
- Then we fourier transform the wavefunction to evolve it in the momentum basis
-
- Instead of integrating the following the standard position space representation of the equation:
-
- <p align="center">
-  <img src="https://latex.codecogs.com/gif.latex?%5Cbg_black%20i%20%28%5Cfrac%7Bd%5Cpsi%7D%7Bdx%7D%29%20%3D%20-%5Cfrac%7B1%7D%7B2%7D%20%28%5Cfrac%7Bd%5Cpsi%7D%7Bdx%7D%29%5E%7B2%7D%20&plus;%20U%28x%29%5Cpsi%28x%29"/>
-</p>
-
-This method is able to achieve a much higher level of accuracy by spliting our integration into two parts and relying on the flexibility of the FFTw algorithm to handle our computational complexity.
+The split-operator method alternates between bases so the potential operator is
+pointwise in position space and the kinetic operator is pointwise in momentum
+space. FFTW supplies the forward and inverse discrete Fourier transforms.
 
 <p align="center">
   <img src="https://github.com/mauckc/2D-Quantum-Free-Particle/blob/master/visualization/figures/img1.png" width=640 height=480 />
