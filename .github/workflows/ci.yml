@@ -14,8 +14,10 @@ jobs:
       - name: Set up Python
         run: uv python install 3.12
       - name: Install dependencies
-        run: uv sync --dev
+        run: uv sync --dev --extra ui
       - name: Run tests
         run: uv run pytest
       - name: Run CLI smoke experiment
         run: uv run quantum-lab run examples/free_packet.toml --out /tmp/quantum-lab-smoke
+      - name: Check dashboard entrypoint
+        run: uv run --extra ui streamlit version

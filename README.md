@@ -23,6 +23,24 @@ uv run quantum-lab validate examples/validation_suite.toml --out reports/validat
 uv run quantum-lab render runs/free_packet/run.npz --out reports/free_packet
 ```
 
+### Interactive dashboard
+
+Install the optional UI dependency and launch the local Streamlit research
+dashboard:
+
+```bash
+uv sync --dev --extra ui
+uv run --extra ui streamlit run apps/streamlit_dashboard.py
+```
+
+The dashboard provides parameter controls for free-packet and barrier/Zeno
+experiments, a saved-frame viewer for probability density and phase, norm and
+probability diagnostics, and access to the generated NPZ and report artifacts.
+Its validation workspace runs the same physics benchmarks as
+`quantum-lab validate` and displays their pass/fail results and convergence
+plots. Dashboard output is saved under `runs/dashboard/` and
+`reports/dashboard/`, which remain ignored by Git.
+
 The new solver uses a NumPy Strang split-step Fourier method with periodic
 FFT boundaries, normalized Gaussian wave packets, configurable potentials, and
 static report generation. Run artifacts are saved as compressed `.npz` files
