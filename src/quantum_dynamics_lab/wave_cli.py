@@ -31,6 +31,13 @@ def main(argv: list[str] | None = None) -> int:
     optimize_parser.add_argument("--out", type=Path, required=True)
     optimize_parser.add_argument("--resume", type=Path)
 
+    flagship_parser = subparsers.add_parser(
+        "flagship",
+        help="Run the robust Gaussian-to-HG10 baseline comparison",
+    )
+    flagship_parser.add_argument("config", type=Path)
+    flagship_parser.add_argument("--out", type=Path, required=True)
+
     args = parser.parse_args(argv)
     if args.command == "propagate":
         config = load_wave_config(args.config)
@@ -49,6 +56,13 @@ def main(argv: list[str] | None = None) -> int:
         )
         print(result.out_dir)
         return 0 if result.status in {"complete", "early_stopped"} else 1
+    if args.command == "flagship":
+        from .flagship import run_flagship
+        from .flagship_config import load_flagship_config
+
+        run_flagship(load_flagship_config(args.config), args.out)
+        print(args.out)
+        return 0
     return 2
 
 
