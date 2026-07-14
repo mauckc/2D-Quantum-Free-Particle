@@ -23,12 +23,32 @@ def main(argv: list[str] | None = None) -> int:
     propagate_parser.add_argument("config", type=Path)
     propagate_parser.add_argument("--out", type=Path, required=True)
 
+    optimize_parser = subparsers.add_parser(
+        "optimize",
+        help="Run constrained phase-mask inverse design",
+    )
+    optimize_parser.add_argument("config", type=Path)
+    optimize_parser.add_argument("--out", type=Path, required=True)
+    optimize_parser.add_argument("--resume", type=Path)
+
     args = parser.parse_args(argv)
     if args.command == "propagate":
         config = load_wave_config(args.config)
         run_path = save_wave_run(run_wave_propagation(config), args.out)
         print(run_path)
         return 0
+    if args.command == "optimize":
+        from .design_config import load_inverse_design_config
+        from .optimization import run_inverse_design
+
+        config = load_inverse_design_config(args.config)
+        result = run_inverse_design(
+            config,
+            args.out,
+            resume=args.resume,
+        )
+        print(result.out_dir)
+        return 0 if result.status in {"complete", "early_stopped"} else 1
     return 2
 
 

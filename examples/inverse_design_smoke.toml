@@ -1,0 +1,34 @@
+name = "inverse_design_smoke"
+seed = 20260714
+
+[grid]
+shape = 24
+extent_m = 0.004
+wavelength_m = 1.064e-6
+
+[input_mode]
+kind = "gaussian"
+waist_m = 0.00055
+
+[target_mode]
+kind = "hermite_gaussian"
+order = [1, 0]
+waist_m = 0.00055
+
+[design]
+plane_distances_m = [0.04, 0.05, 0.03]
+initial_scale = 0.2
+phase_bounds_rad = [-3.141592653589793, 3.141592653589793]
+smoothing_passes = 1
+total_variation_weight = 0.0001
+
+[objective]
+mode_overlap_weight = 1.0
+intensity_weight = 0.05
+
+[optimizer]
+iterations = 30
+learning_rate = 0.08
+checkpoint_interval = 5
+early_stopping_patience = 15
+min_delta = 1e-8
