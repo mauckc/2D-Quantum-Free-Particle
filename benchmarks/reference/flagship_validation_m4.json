@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "name": "robust_gaussian_to_hg10",
+  "model_transfer_summary": {
+    "maximum_absolute_overlap_transfer_loss": 4.448768787801427e-07,
+    "maximum_absolute_efficiency_transfer_loss": 4.4395809906117023e-07,
+    "minimum_blas_retained_spectral_power": 1.0
+  },
+  "convergence_summary": {
+    "grid_finest_pair_overlap_change": 0.00643370296723933,
+    "padding_finest_pair_overlap_change": 2.11153217166693e-06,
+    "aperture_finest_pair_overlap_change": 1.881571062734011e-06,
+    "step_finest_pair_overlap_change": 0.0,
+    "boundary_power_fraction": 3.2712308056280675e-08
+  },
+  "series": {
+    "grid_overlap": [
+      0.8824403215175378,
+      0.924105464735772,
+      0.8816786330250703,
+      0.875244930057831
+    ],
+    "padding_overlap": [
+      0.924105464735772,
+      0.9241017416371153,
+      0.9240996301049437
+    ],
+    "aperture_overlap": [
+      0.9236108955553259,
+      0.924105464735772,
+      0.9240724116052675,
+      0.9240705300342048
+    ],
+    "step_overlap": [
+      0.924105464735772,
+      0.9241054647357724,
+      0.9241054647357724
+    ]
+  },
+  "trusted": true,
+  "checks": {
+    "model_transfer_overlap": true,
+    "model_transfer_efficiency": true,
+    "blas_retained_power": true,
+    "grid_convergence": true,
+    "padding_convergence": true,
+    "aperture_convergence": true,
+    "step_convergence": true,
+    "boundary_power": true
+  }
+}

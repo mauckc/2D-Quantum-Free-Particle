@@ -79,3 +79,11 @@ JAX_ENABLE_X64=1 uv run --extra jax python -m benchmarks.reference.generate_flag
 This reference establishes the Fresnel-model comparison only. The v1.0 model-
 transfer conclusion additionally requires the committed BLAS and convergence
 evidence.
+
+`flagship_validation_m4.json` records that second half of the M4 ladder:
+Fresnel-to-BLAS transfer, retained spectrum, and grid/padding/aperture/substep
+convergence. Regenerate it with:
+
+```bash
+JAX_ENABLE_X64=1 uv run --extra jax python -m benchmarks.reference.generate_flagship_validation_m4
+```
