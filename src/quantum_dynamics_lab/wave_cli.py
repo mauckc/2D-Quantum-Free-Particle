@@ -59,8 +59,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "flagship":
         from .flagship import run_flagship
         from .flagship_config import load_flagship_config
+        from .flagship_validation import validate_flagship
 
-        run_flagship(load_flagship_config(args.config), args.out)
+        config = load_flagship_config(args.config)
+        flagship = run_flagship(config, args.out)
+        validate_flagship(config, flagship, args.out)
         print(args.out)
         return 0
     return 2
