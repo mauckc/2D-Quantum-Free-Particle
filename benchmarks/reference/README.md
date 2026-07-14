@@ -49,3 +49,16 @@ The limits are numerical acceptance thresholds for coherent monochromatic
 scalar free-space optics. Their trusted regime is documented in
 `docs/optics-model-validation.md`; they do not establish vector-Maxwell or
 high-index integrated-photonics accuracy.
+
+## Differentiable solver M2
+
+`jax_m2.json` records NumPy/JAX objective parity, centered directional finite-
+difference checks for mode and intensity losses, and a compiled CPU update. It
+uses deterministic seed `20260714` and JAX x64. Regenerate it with:
+
+```bash
+JAX_ENABLE_X64=1 uv run --extra jax python -m benchmarks.reference.generate_jax_m2
+```
+
+The gradient tolerances validate the implemented discrete Fresnel computation,
+not the scalar physical model or an optimization result.

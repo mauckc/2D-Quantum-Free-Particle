@@ -19,12 +19,13 @@ direction and milestone gates; it is not a daily task list.
 
 ## Current Priority
 
-**M0 - Pivot foundation** and **M1 - Forward optics v0.2** are complete. The
-next behavioral work is **M2 - Differentiable solver v0.3**: add optional JAX
-execution without replacing NumPy as the correctness reference, establish
-value parity, add array-native objectives, and validate gradients with centered
-directional finite differences. Do not add the optimization engine or more
-dashboard features ahead of those differentiation gates.
+**M0 - Pivot foundation**, **M1 - Forward optics v0.2**, and **M2 -
+Differentiable solver v0.3** are complete. The next behavioral work is **M3 -
+Inverse-design MVP v0.4**: add bounded phase parameterization, regularization
+and quantization constraints, then build deterministic Adam optimization with
+restart, early stopping, checkpoints, and complete provenance. Do not begin the
+robust flagship or dashboard redesign ahead of that reproducible optimization
+gate.
 
 ## Project Invariants
 
