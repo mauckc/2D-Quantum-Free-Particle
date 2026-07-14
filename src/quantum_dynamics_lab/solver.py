@@ -9,10 +9,47 @@ from numpy.typing import NDArray
 from .backends import FFTBackend, create_backend
 from .config import BoundaryConfig, SolverConfig
 from .grid import Grid, norm
+from .propagation import (
+    PropagationBackend,
+    SplitStepOperators,
+    prepare_split_step_operators,
+    propagate_split_step,
+)
 
 
 ComplexArray = NDArray[np.complex128]
 FloatArray = NDArray[np.float64]
+
+
+@dataclass(frozen=True)
+class _QuantumPropagationBackend:
+    """Adapt a legacy FFT backend to the array-native propagation protocol."""
+
+    fft_backend: FFTBackend
+
+    @property
+    def name(self) -> str:
+        return self.fft_backend.name
+
+    def asarray(self, values: object) -> ComplexArray:
+        return np.asarray(values, dtype=np.complex128)
+
+    def shape(self, values: ComplexArray) -> tuple[int, ...]:
+        return values.shape
+
+    def exp(self, values: ComplexArray) -> ComplexArray:
+        return np.asarray(np.exp(values), dtype=np.complex128)
+
+    def multiply(
+        self, left: ComplexArray, right: ComplexArray | float | complex
+    ) -> ComplexArray:
+        return np.asarray(np.multiply(left, right), dtype=np.complex128)
+
+    def fft2(self, values: ComplexArray) -> ComplexArray:
+        return np.asarray(self.fft_backend.fft2(values), dtype=np.complex128)
+
+    def ifft2(self, values: ComplexArray) -> ComplexArray:
+        return np.asarray(self.fft_backend.ifft2(values), dtype=np.complex128)
 
 
 @dataclass(frozen=True)
@@ -63,19 +100,28 @@ class SplitStepSolver:
     def backend_name(self) -> str:
         return self.fft_backend.name
 
+    @cached_property
+    def propagation_backend(self) -> PropagationBackend[ComplexArray]:
+        return _QuantumPropagationBackend(self.fft_backend)
+
+    @cached_property
+    def split_step_operators(self) -> SplitStepOperators[ComplexArray]:
+        return prepare_split_step_operators(
+            -1j * self.potential / self.config.hbar,
+            -1j * self.config.hbar * self.grid.k2 / (2.0 * self.config.mass),
+            self.config.dt,
+            backend=self.propagation_backend,
+        )
+
     def step(self, psi: ComplexArray) -> ComplexArray:
         return self.step_with_diagnostics(psi).psi
 
     def step_with_diagnostics(self, psi: ComplexArray) -> StepResult:
-        dt = self.config.dt
-        hbar = self.config.hbar
-        mass = self.config.mass
-        position_half = np.exp(-0.5j * self.potential * dt / hbar)
-        kinetic = np.exp(-1j * hbar * self.grid.k2 * dt / (2.0 * mass))
-        psi = position_half * psi
-        backend = self.fft_backend
-        psi = backend.ifft2(backend.fft2(psi) * kinetic)
-        psi = (position_half * psi).astype(np.complex128)
+        psi = propagate_split_step(
+            psi,
+            self.split_step_operators,
+            backend=self.propagation_backend,
+        )
         before_absorber = norm(psi, self.grid)
         psi = self.absorber_mask * psi
         absorbed = max(0.0, before_absorber - norm(psi, self.grid))
