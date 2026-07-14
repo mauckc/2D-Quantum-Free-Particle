@@ -62,3 +62,20 @@ JAX_ENABLE_X64=1 uv run --extra jax python -m benchmarks.reference.generate_jax_
 
 The gradient tolerances validate the implemented discrete Fresnel computation,
 not the scalar physical model or an optimization result.
+
+## Robust flagship M4
+
+`flagship_m4.json` records the deterministic four-baseline Gaussian-to-HG10
+comparison, including nominal, held-out mean, and held-out worst metrics. Its
+robustness and held-out scenario signatures are disjoint and both cover
+wavelength, alignment, phase-depth, and plane-spacing perturbations.
+
+Regenerate the reference with:
+
+```bash
+JAX_ENABLE_X64=1 uv run --extra jax python -m benchmarks.reference.generate_flagship_m4
+```
+
+This reference establishes the Fresnel-model comparison only. The v1.0 model-
+transfer conclusion additionally requires the committed BLAS and convergence
+evidence.

@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "name": "robust_gaussian_to_hg10",
+  "seed": 20260714,
+  "required_baselines": [
+    "no_masks",
+    "one_optimized_mask",
+    "three_nominal_masks",
+    "three_robust_masks"
+  ],
+  "common_physics": {
+    "shape": [32, 32],
+    "extent_m": [0.004, 0.004],
+    "wavelength_m": 1.064e-06,
+    "waist_m": 0.00055,
+    "plane_distances_m": [0.04, 0.05, 0.03],
+    "total_length_m": 0.12,
+    "aperture_radius_m": 0.0015,
+    "source": "Gaussian",
+    "target": "HG10"
+  },
+  "scenario_sets_disjoint": true,
+  "baselines": {
+    "no_masks": {
+      "nominal": {
+        "mode_overlap": 3.995286361569004e-22,
+        "intensity_similarity": 0.5824911604649308,
+        "mode_power_efficiency": 3.9952812274742094e-22
+      },
+      "held_out_mean": {
+        "mode_overlap": 3.999439465775733e-22,
+        "intensity_similarity": 0.5824920299084323,
+        "mode_power_efficiency": 3.999434323657159e-22
+      },
+      "held_out_worst": {
+        "mode_overlap": 3.6424621427368936e-22,
+        "intensity_similarity": 0.5822405823904026,
+        "mode_power_efficiency": 3.64245755767084e-22
+      }
+    },
+    "one_optimized_mask": {
+      "nominal": {
+        "mode_overlap": 0.6082995320173632,
+        "intensity_similarity": 0.716561031490579,
+        "mode_power_efficiency": 0.6082268602293688
+      },
+      "held_out_mean": {
+        "mode_overlap": 0.5838580344793051,
+        "intensity_similarity": 0.6924200477068398,
+        "mode_power_efficiency": 0.58378877514778
+      },
+      "held_out_worst": {
+        "mode_overlap": 0.45692422359988244,
+        "intensity_similarity": 0.5973979134518795,
+        "mode_power_efficiency": 0.45687109003986054
+      }
+    },
+    "three_nominal_masks": {
+      "nominal": {
+        "mode_overlap": 0.9365109601779865,
+        "intensity_similarity": 0.9626200495410477,
+        "mode_power_efficiency": 0.9364570321086794
+      },
+      "held_out_mean": {
+        "mode_overlap": 0.8994835337345692,
+        "intensity_similarity": 0.9313873282315075,
+        "mode_power_efficiency": 0.8994300347156678
+      },
+      "held_out_worst": {
+        "mode_overlap": 0.7621715111711788,
+        "intensity_similarity": 0.8031989896441659,
+        "mode_power_efficiency": 0.7621284055260628
+      }
+    },
+    "three_robust_masks": {
+      "nominal": {
+        "mode_overlap": 0.924105464735772,
+        "intensity_similarity": 0.9605608589753052,
+        "mode_power_efficiency": 0.9240607706865561
+      },
+      "held_out_mean": {
+        "mode_overlap": 0.8878058662475234,
+        "intensity_similarity": 0.9298407084404011,
+        "mode_power_efficiency": 0.887760871726099
+      },
+      "held_out_worst": {
+        "mode_overlap": 0.7813492347219079,
+        "intensity_similarity": 0.8273429494502405,
+        "mode_power_efficiency": 0.7813151931036638
+      }
+    }
+  },
+  "robust_worst_case_overlap_advantage": 0.01917772355072911,
+  "robustness_claim_passed": true,
+  "declared_limits": {
+    "minimum_robust_worst_case_advantage": 0.01,
+    "reproduction_absolute_tolerance": 2e-10,
+    "reproduction_relative_tolerance": 2e-10
+  }
+}

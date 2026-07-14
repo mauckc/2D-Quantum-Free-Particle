@@ -1,0 +1,51 @@
+name = "robust_gaussian_to_hg10"
+seed = 20260714
+
+[grid]
+shape = 32
+extent_m = 0.004
+wavelength_m = 1.064e-6
+
+[system]
+waist_m = 0.00055
+plane_distances_m = [0.04, 0.05, 0.03]
+aperture_radius_m = 0.0015
+
+[constraints]
+phase_bounds_rad = [-3.141592653589793, 3.141592653589793]
+smoothing_passes = 1
+total_variation_weight = 0.0001
+
+[objective]
+intensity_weight = 0.05
+worst_case_weight = 1.0
+
+[optimizer]
+iterations = 60
+learning_rate = 0.08
+initial_scale = 0.2
+
+[robustness]
+optimization_scenarios = [
+  { name = "opt_nominal", kind = "nominal" },
+  { name = "opt_wavelength_low", kind = "wavelength", wavelength_scale = 0.98 },
+  { name = "opt_wavelength_high", kind = "wavelength", wavelength_scale = 1.02 },
+  { name = "opt_align_x_low", kind = "alignment", alignment_pixels = [0, -1] },
+  { name = "opt_align_x_high", kind = "alignment", alignment_pixels = [0, 1] },
+  { name = "opt_align_y_low", kind = "alignment", alignment_pixels = [-1, 0] },
+  { name = "opt_align_y_high", kind = "alignment", alignment_pixels = [1, 0] },
+  { name = "opt_phase_low", kind = "phase_depth", phase_depth_scale = 0.9 },
+  { name = "opt_phase_high", kind = "phase_depth", phase_depth_scale = 1.1 },
+  { name = "opt_spacing_low", kind = "plane_spacing", spacing_scale = 0.95 },
+  { name = "opt_spacing_high", kind = "plane_spacing", spacing_scale = 1.05 },
+]
+held_out_scenarios = [
+  { name = "held_wavelength_low", kind = "wavelength", wavelength_scale = 0.99 },
+  { name = "held_wavelength_high", kind = "wavelength", wavelength_scale = 1.01 },
+  { name = "held_align_diag_low", kind = "alignment", alignment_pixels = [-1, -1] },
+  { name = "held_align_diag_high", kind = "alignment", alignment_pixels = [1, 1] },
+  { name = "held_phase_low", kind = "phase_depth", phase_depth_scale = 0.95 },
+  { name = "held_phase_high", kind = "phase_depth", phase_depth_scale = 1.05 },
+  { name = "held_spacing_low", kind = "plane_spacing", spacing_scale = 0.975 },
+  { name = "held_spacing_high", kind = "plane_spacing", spacing_scale = 1.025 },
+]
