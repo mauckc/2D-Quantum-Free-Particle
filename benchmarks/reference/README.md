@@ -32,3 +32,20 @@ The recorded tolerances allow only floating-point/FFT roundoff across supported
 platforms. They are regression tolerances, not uncertainty estimates and not
 evidence that the current Zeno or double-slit interpretation is physically
 validated.
+
+## Scalar optics M1
+
+`optics_m1.json` records the analytic Gaussian, thin-lens focus, conservation,
+reversibility, grid/window convergence, retained-band, and Fresnel-to-angular-
+spectrum metrics that establish the M1 NumPy reference regime.
+
+Regenerate the file from the repository root with:
+
+```bash
+uv run python -m benchmarks.reference.generate_optics_m1
+```
+
+The limits are numerical acceptance thresholds for coherent monochromatic
+scalar free-space optics. Their trusted regime is documented in
+`docs/optics-model-validation.md`; they do not establish vector-Maxwell or
+high-index integrated-photonics accuracy.
