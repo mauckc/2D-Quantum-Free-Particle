@@ -21,3 +21,17 @@ jobs:
         run: uv run quantum-lab run examples/free_packet.toml --out /tmp/quantum-lab-smoke
       - name: Check dashboard entrypoint
         run: uv run --extra ui streamlit version
+
+  jax-test:
+    runs-on: ubuntu-latest
+    env:
+      JAX_ENABLE_X64: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install JAX CPU dependencies
+        run: uv sync --dev --extra jax
+      - name: Run full suite with JAX enabled
+        run: uv run --extra jax pytest
