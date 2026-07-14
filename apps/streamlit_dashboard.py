@@ -10,12 +10,15 @@ from quantum_dynamics_lab.dashboard import (
     DashboardParameters,
     DashboardRun,
     DashboardSweep,
+    load_flagship_dashboard_summary,
+    plot_wave_field_panels,
     experiment_summary,
     plot_diagnostic_panels,
     plot_double_slit_panels,
     plot_field_panels,
     run_dashboard_experiment,
     run_dashboard_validation,
+    run_dashboard_wave_forward,
     run_dashboard_zeno_sweep,
     timestamped_output_dir,
 )
@@ -27,39 +30,215 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> None:
-    st.set_page_config(page_title="2D Quantum Dynamics Lab", layout="wide")
-    st.title("2D Quantum Dynamics Lab")
-    experiment_tab, sweep_tab, validation_tab = st.tabs(
-        ["Experiment", "Zeno Sweep", "Validation"]
+    st.set_page_config(page_title="Differentiable 2D Wave Lab", layout="wide")
+    st.title("Differentiable 2D Wave Inverse-Design Lab")
+    st.caption(
+        "Validated scalar free-space propagation, constrained inverse design, "
+        "and a preserved legacy quantum demonstration workspace."
+    )
+    forward_tab, design_tab, flagship_tab, quantum_tab = st.tabs(
+        ["Forward Optics", "Inverse Design", "Validated Flagship", "Legacy Quantum"]
     )
 
-    parameters, run_requested = _experiment_controls()
-    with experiment_tab:
-        if run_requested:
-            out_dir = timestamped_output_dir(ROOT / "runs" / "dashboard", parameters.name)
-            try:
-                with st.spinner("Evolving wavefunction and generating artifacts..."):
-                    st.session_state["dashboard_run"] = run_dashboard_experiment(
-                        parameters, out_dir
-                    )
-            except (OSError, RuntimeError, ValueError) as exc:
-                st.error(str(exc))
-        dashboard_run = st.session_state.get("dashboard_run")
-        if dashboard_run is None:
-            st.info("Set experiment parameters in the sidebar and run a simulation.")
-        else:
-            _show_experiment(dashboard_run)
+    with forward_tab:
+        _forward_optics_workspace()
 
-    with sweep_tab:
-        _zeno_sweep_workspace(parameters)
+    with design_tab:
+        _inverse_design_workspace()
 
-    with validation_tab:
-        _validation_workspace()
+    with flagship_tab:
+        _flagship_workspace()
+
+    with quantum_tab:
+        st.info(
+            "Legacy quantum demonstrations remain supported for compatibility and "
+            "regression coverage; their Zeno/double-slit diagnostics are not new "
+            "research validation."
+        )
+        experiment_tab, sweep_tab, validation_tab = st.tabs(
+            ["Experiment", "Zeno Sweep", "Validation"]
+        )
+
+        parameters, run_requested = _experiment_controls()
+        with experiment_tab:
+            if run_requested:
+                out_dir = timestamped_output_dir(
+                    ROOT / "runs" / "dashboard", parameters.name
+                )
+                try:
+                    with st.spinner("Evolving wavefunction and generating artifacts..."):
+                        st.session_state["dashboard_run"] = run_dashboard_experiment(
+                            parameters, out_dir
+                        )
+                except (OSError, RuntimeError, ValueError) as exc:
+                    st.error(str(exc))
+            dashboard_run = st.session_state.get("dashboard_run")
+            if dashboard_run is None:
+                st.info("Set quantum parameters in the sidebar and run a simulation.")
+            else:
+                _show_experiment(dashboard_run)
+
+        with sweep_tab:
+            _zeno_sweep_workspace(parameters)
+
+        with validation_tab:
+            _validation_workspace()
+
+
+def _forward_optics_workspace() -> None:
+    st.subheader("Scalar forward propagation")
+    st.write(
+        "Run a coherent monochromatic Gaussian/HG/array field through lenses, "
+        "apertures, phase masks, and Fresnel or BLAS propagation."
+    )
+    config_value = st.text_input(
+        "Forward config",
+        value="examples/gaussian_lens.toml",
+        key="wave_forward_config",
+    )
+    if st.button("Run forward optics", type="primary"):
+        config_path = _repository_path(config_value)
+        out_dir = timestamped_output_dir(
+            ROOT / "runs" / "dashboard" / "wave", config_path.stem
+        )
+        try:
+            with st.spinner("Propagating scalar field and saving artifacts..."):
+                st.session_state["wave_dashboard_run"] = run_dashboard_wave_forward(
+                    config_path,
+                    out_dir,
+                )
+        except (OSError, RuntimeError, ValueError) as exc:
+            st.error(str(exc))
+    dashboard_run = st.session_state.get("wave_dashboard_run")
+    if dashboard_run is None:
+        st.info("Run the committed Gaussian-through-lens example or another wave config.")
+        return
+    metrics = dashboard_run.run.metrics
+    columns = st.columns(3)
+    columns[0].metric("Input power", f"{metrics['input_power']:.8f}")
+    columns[1].metric("Final power", f"{metrics['final_power']:.8f}")
+    columns[2].metric("Efficiency", f"{metrics['power_efficiency']:.8f}")
+    plot_columns = st.columns(2)
+    for column, figure in zip(
+        plot_columns,
+        plot_wave_field_panels(dashboard_run.run),
+        strict=True,
+    ):
+        column.pyplot(figure, width="stretch")
+        plt.close(figure)
+    st.code(str(dashboard_run.run_path.relative_to(ROOT)))
+    st.download_button(
+        "Download wave_run.npz",
+        dashboard_run.run_path.read_bytes(),
+        file_name="wave_run.npz",
+        mime="application/octet-stream",
+        on_click="ignore",
+    )
+
+
+def _inverse_design_workspace() -> None:
+    st.subheader("Constrained phase-mask inverse design")
+    st.write(
+        "The deterministic Adam runner supports bounded/smoothed/TV/quantized "
+        "phase masks, restart checkpoints, early stopping, and complete provenance."
+    )
+    st.code(
+        "JAX_ENABLE_X64=1 uv run --extra jax wave-lab optimize "
+        "examples/inverse_design_smoke.toml --out runs/inverse-design-smoke"
+    )
+    if st.button("Run inverse-design smoke"):
+        try:
+            from quantum_dynamics_lab.design_config import load_inverse_design_config
+            from quantum_dynamics_lab.optimization import run_inverse_design
+
+            out_dir = timestamped_output_dir(
+                ROOT / "runs" / "dashboard" / "design", "inverse-design-smoke"
+            )
+            with st.spinner("Compiling and optimizing on the available JAX device..."):
+                result = run_inverse_design(
+                    load_inverse_design_config(ROOT / "examples/inverse_design_smoke.toml"),
+                    out_dir,
+                )
+            st.session_state["design_dashboard_result"] = result
+        except (ImportError, OSError, RuntimeError, ValueError) as exc:
+            st.error(f"Install the JAX extra and enable x64 before optimizing: {exc}")
+    result = st.session_state.get("design_dashboard_result")
+    if result is not None:
+        columns = st.columns(3)
+        columns[0].metric(
+            "Initial overlap", f"{result.metrics['initial']['mode_overlap']:.6f}"
+        )
+        columns[1].metric(
+            "Best overlap", f"{result.metrics['best']['mode_overlap']:.6f}"
+        )
+        columns[2].metric(
+            "Improvement", f"{result.metrics['mode_overlap_improvement']:.6f}"
+        )
+        st.code(str(result.out_dir.relative_to(ROOT)))
+
+
+def _flagship_workspace() -> None:
+    st.subheader("Validated robust Gaussian-to-HG10 flagship")
+    reference = load_flagship_dashboard_summary(ROOT)
+    rows = []
+    for name, baseline in reference.comparison["baselines"].items():
+        rows.append(
+            {
+                "baseline": name,
+                "nominal_overlap": baseline["nominal"]["mode_overlap"],
+                "held_mean_overlap": baseline["held_out_mean"]["mode_overlap"],
+                "held_worst_overlap": baseline["held_out_worst"]["mode_overlap"],
+                "held_worst_efficiency": baseline["held_out_worst"][
+                    "mode_power_efficiency"
+                ],
+            }
+        )
+    st.dataframe(rows, width="stretch", hide_index=True)
+    validation_columns = st.columns(3)
+    validation_columns[0].metric(
+        "Robust worst-case advantage",
+        f"{reference.comparison['robust_worst_case_overlap_advantage']:.6f}",
+    )
+    validation_columns[1].metric(
+        "Max Fresnel→BLAS loss",
+        f"{reference.validation['model_transfer_summary']['maximum_absolute_overlap_transfer_loss']:.2e}",
+    )
+    validation_columns[2].metric(
+        "Trusted validation", "PASS" if reference.validation["trusted"] else "FAIL"
+    )
+    st.caption(
+        "Optimization and held-out scenarios are disjoint. The robust design "
+        "improves held-out worst case while slightly reducing nominal/mean performance."
+    )
+    if st.button("Regenerate flagship and validation"):
+        try:
+            from quantum_dynamics_lab.flagship import run_flagship
+            from quantum_dynamics_lab.flagship_config import load_flagship_config
+            from quantum_dynamics_lab.flagship_validation import validate_flagship
+
+            config = load_flagship_config(ROOT / "examples/robust_flagship.toml")
+            out_dir = timestamped_output_dir(
+                ROOT / "reports" / "dashboard" / "flagship", "robust-flagship"
+            )
+            with st.spinner("Optimizing all baselines and running BLAS validation..."):
+                result = run_flagship(config, out_dir)
+                validate_flagship(config, result, out_dir)
+            st.session_state["flagship_dashboard_out"] = out_dir
+        except (ImportError, OSError, RuntimeError, ValueError) as exc:
+            st.error(f"Install the JAX extra and enable x64 before regenerating: {exc}")
+    flagship_out = st.session_state.get("flagship_dashboard_out")
+    if flagship_out is not None:
+        st.success(f"Flagship artifacts written to {flagship_out.relative_to(ROOT)}")
+
+
+def _repository_path(value: str) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else ROOT / path
 
 
 def _experiment_controls() -> tuple[DashboardParameters, bool]:
     with st.sidebar:
-        st.header("Experiment setup")
+        st.header("Legacy quantum setup")
         mode = st.segmented_control(
             "Experiment",
             ["Free packet", "Barrier / Zeno", "Double slit"],

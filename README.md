@@ -1,12 +1,107 @@
-# 2D-Quantum-Free-Particle
+# Differentiable 2D Wave Inverse-Design Lab
 
-> **Project direction:** this repository is being incrementally generalized into
-> a differentiable 2D wave inverse-design lab, with scalar photonics as the first
-> practical application. The existing quantum workflows remain supported during
-> the migration. See [ROADMAP.md](ROADMAP.md) for scope, milestones, and current
-> status.
+This repository is a reproducible 2D scalar-wave propagation and inverse-design
+laboratory. NumPy is the correctness reference; optional JAX supplies automatic
+differentiation and JIT-compiled multi-plane optimization. The v1.0 flagship is
+a robust three-plane phase-only Gaussian-to-HG10 converter evaluated under
+held-out perturbations and independently cross-checked with band-limited angular
+spectrum propagation.
 
-## 2D Quantum Dynamics Lab
+The original `quantum-lab` CLI, configs, dashboard experiments, and frozen
+quantum v0.1 regression baseline remain supported as legacy demonstrations.
+See [ROADMAP.md](ROADMAP.md), [the accepted ADRs](docs/adr/README.md), and
+[CONTRIBUTING.md](CONTRIBUTING.md) for scope and evidence rules.
+
+## Wave lab v1.0 quick start
+
+Forward scalar optics uses only the NumPy reference path:
+
+```bash
+uv sync --dev
+uv run pytest
+uv run wave-lab propagate examples/gaussian_lens.toml --out runs/gaussian-lens
+```
+
+Differentiable optimization and the full robust flagship use the optional JAX
+CPU path in 64-bit mode:
+
+```bash
+uv sync --dev --extra jax
+JAX_ENABLE_X64=1 uv run --extra jax wave-lab optimize examples/inverse_design_smoke.toml --out runs/inverse-design-smoke
+JAX_ENABLE_X64=1 uv run --extra jax wave-lab flagship examples/robust_flagship.toml --out runs/robust-flagship
+JAX_ENABLE_X64=1 uv run --extra jax pytest
+```
+
+On PowerShell, set `$env:JAX_ENABLE_X64 = "1"` before running the JAX commands.
+GPU availability is optional and is not required for correctness or CI.
+
+### Product boundary
+
+v1.0 supports monochromatic coherent scalar fields, Gaussian/Hermite-Gaussian
+and arbitrary complex inputs, lenses/apertures/phase masks, Fresnel and
+band-limited angular-spectrum propagation, normalized optical objectives,
+bounded/smoothed/TV/quantized phase constraints, restartable Adam optimization,
+robust ensembles, held-out evaluation, and provenance-rich artifacts.
+
+It does not claim polarization or vector-Maxwell accuracy, nonlinear/broadband
+or partially coherent propagation, high-index integrated-photonics validity,
+manufacturing-ready layout, or mask export.
+
+### Flagship evidence
+
+The four required comparisons use a common 1064 nm grid, aperture, 12 cm total
+length, Gaussian source, HG10 target, constraints, metrics, and seed:
+
+| Baseline | Nominal overlap | Held-out mean | Held-out worst | Worst efficiency |
+| --- | ---: | ---: | ---: | ---: |
+| No masks | ~0 | ~0 | ~0 | ~0 |
+| One optimized mask | 0.608300 | 0.583858 | 0.456924 | 0.456871 |
+| Three nominal masks | 0.936511 | 0.899484 | 0.762172 | 0.762128 |
+| Three robust masks | 0.924105 | 0.887806 | 0.781349 | 0.781315 |
+
+Optimization and held-out sets are disjoint and both cover wavelength,
+alignment, phase-depth, and plane-spacing perturbations. Robust training gains
+`0.019178` in held-out worst overlap over nominal three-mask training, while
+slightly reducing nominal and held-out mean performance; that tradeoff is part
+of the result, not hidden.
+
+The independently implemented NumPy BLAS evaluation reports maximum absolute
+Fresnel-transfer loss `4.45e-7`, minimum retained sampled spectral power `1.0`,
+grid finest-pair change `0.00643`, padding change `2.11e-6`, aperture change
+`1.88e-6`, substep change `0`, and padded boundary power `3.27e-8`. All
+predeclared gates pass. The trusted regime is limited to the committed
+monochromatic coherent scalar free-space sampling, window, aperture, and angular
+content. Optional reduced-scale Maxwell/FDTD was not performed because the
+millimetre-scale system is outside practical CPU CI scope; ADR 0004 makes
+independent scalar-model transfer the release gate.
+
+Evidence and regeneration details:
+
+- [M1 propagation validation](docs/optics-model-validation.md) and
+  [`optics_m1.json`](benchmarks/reference/optics_m1.json)
+- [M2 objectives/gradients](docs/objectives-and-gradients.md) and
+  [`jax_m2.json`](benchmarks/reference/jax_m2.json)
+- [M3 restartable optimizer](docs/inverse-design-runner.md)
+- [M4 flagship protocol](docs/flagship-experiment.md) and
+  [`flagship_m4.json`](benchmarks/reference/flagship_m4.json)
+- [M4 model transfer](docs/flagship-model-transfer.md) and
+  [`flagship_validation_m4.json`](benchmarks/reference/flagship_validation_m4.json)
+
+## Interactive dashboard
+
+```bash
+uv sync --dev --extra ui
+uv run --extra ui streamlit run apps/streamlit_dashboard.py
+```
+
+The dashboard leads with NumPy forward optics, constrained inverse design, and
+the committed validated flagship summary. Long optimization/flagship actions
+are loaded lazily and require the JAX extra. The “Legacy Quantum” workspace
+retains free-packet, barrier/Zeno, double-slit, sweep, and quantum-validation
+controls. Dashboard outputs remain under ignored `runs/dashboard/` and
+`reports/dashboard/` directories.
+
+## Preserved quantum dynamics workflows
 
 This repository now includes a maintained Python package for reproducible
 2D quantum dynamics experiments. The original C++/Python/GPU scripts remain
@@ -14,7 +109,7 @@ in place as legacy reference material from the Scientific Computing Capstone
 project, while the new `quantum-dynamics-lab` package is the recommended path
 for new runs.
 
-### Quick start with uv
+### Legacy quantum CLI
 
 ```bash
 uv sync --dev
@@ -29,7 +124,7 @@ uv run quantum-lab validate examples/validation_suite.toml --out reports/validat
 uv run quantum-lab render runs/free_packet/run.npz --out reports/free_packet
 ```
 
-### Interactive dashboard
+### Legacy dashboard interpretation
 
 Install the optional UI dependency and launch the local Streamlit research
 dashboard:
@@ -39,10 +134,10 @@ uv sync --dev --extra ui
 uv run --extra ui streamlit run apps/streamlit_dashboard.py
 ```
 
-The dashboard provides parameter controls for free-packet, barrier/Zeno, and
-double-slit experiments, a saved-frame viewer for probability density and
-phase, norm and probability diagnostics, and access to the generated NPZ and
-report artifacts. Double-slit runs compare coherent and which-path densities,
+The legacy workspace provides parameter controls for free-packet, barrier/Zeno,
+and double-slit experiments, a saved-frame viewer for probability density and
+phase, norm and probability diagnostics, and access to generated artifacts.
+Double-slit runs compare coherent and which-path densities,
 screen profiles, and a global min/max screen-profile contrast. That contrast is
 a visualization and regression diagnostic; it has not been independently
 validated as a physical interference-visibility measurement. The Zeno Sweep

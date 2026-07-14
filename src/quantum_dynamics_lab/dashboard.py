@@ -4,6 +4,7 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+import json
 import re
 
 import matplotlib
@@ -28,6 +29,9 @@ from .config import (
 from .experiments import ExperimentResult, run_experiment
 from .render import render_comparison, render_run
 from .validation import load_validation_config, run_validation
+from .wave_artifacts import save_wave_run
+from .wave_config import load_wave_config
+from .wave_experiments import WaveRun, run_wave_propagation
 
 
 @dataclass(frozen=True)
@@ -73,6 +77,88 @@ class DashboardSweep:
     run_paths: tuple[Path, ...]
     rows: tuple[dict[str, float], ...]
     outputs: dict[str, Path]
+
+
+@dataclass(frozen=True)
+class WaveDashboardRun:
+    run: WaveRun
+    run_path: Path
+
+
+@dataclass(frozen=True)
+class FlagshipDashboardSummary:
+    comparison: dict[str, Any]
+    validation: dict[str, Any]
+
+
+def run_dashboard_wave_forward(
+    config_path: str | Path,
+    out_dir: str | Path,
+) -> WaveDashboardRun:
+    """Run a NumPy forward-optics config without importing optional JAX."""
+
+    run = run_wave_propagation(load_wave_config(config_path))
+    return WaveDashboardRun(run=run, run_path=save_wave_run(run, out_dir))
+
+
+def plot_wave_field_panels(run: WaveRun) -> tuple[Figure, Figure]:
+    """Plot input/output intensity and phase for dashboard display."""
+
+    figures = []
+    extent = [
+        float(run.grid.x[0]),
+        float(run.grid.x[-1]),
+        float(run.grid.y[0]),
+        float(run.grid.y[-1]),
+    ]
+    for label, field in (
+        ("Input field", run.input_field),
+        ("Output field", run.final_field),
+    ):
+        figure, axes = plt.subplots(1, 2, figsize=(8.0, 3.2), constrained_layout=True)
+        intensity = axes[0].imshow(
+            np.abs(field) ** 2,
+            origin="lower",
+            extent=extent,
+            cmap="magma",
+        )
+        axes[0].set_title(f"{label} intensity")
+        figure.colorbar(intensity, ax=axes[0], shrink=0.8)
+        phase = axes[1].imshow(
+            np.angle(field),
+            origin="lower",
+            extent=extent,
+            cmap="twilight",
+            vmin=-np.pi,
+            vmax=np.pi,
+        )
+        axes[1].set_title(f"{label} phase")
+        figure.colorbar(phase, ax=axes[1], shrink=0.8)
+        for axis in axes:
+            axis.set_xlabel("x")
+            axis.set_ylabel("y")
+        figures.append(figure)
+    return tuple(figures)
+
+
+def load_flagship_dashboard_summary(
+    repository_root: str | Path | None = None,
+) -> FlagshipDashboardSummary:
+    """Load committed M4 metrics for read-only UI use without JAX."""
+
+    root = (
+        Path(repository_root)
+        if repository_root is not None
+        else Path(__file__).resolve().parents[2]
+    )
+    reference = root / "benchmarks" / "reference"
+    comparison = json.loads(
+        (reference / "flagship_m4.json").read_text(encoding="utf-8")
+    )
+    validation = json.loads(
+        (reference / "flagship_validation_m4.json").read_text(encoding="utf-8")
+    )
+    return FlagshipDashboardSummary(comparison=comparison, validation=validation)
 
 
 def build_experiment_config(parameters: DashboardParameters) -> ExperimentConfig:

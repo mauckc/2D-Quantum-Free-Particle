@@ -1,6 +1,6 @@
 # Differentiable 2D Wave Inverse-Design Lab Roadmap
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Direction
 
@@ -51,7 +51,7 @@ M0 Pivot foundation
 | M1 - Forward optics v0.2 | Complete | Pure propagation core plus validated scalar-optics sources, elements, Fresnel propagation, and angular-spectrum propagation |
 | M2 - Differentiable solver v0.3 | Complete | JAX parity, JIT-compatible propagation, mode-overlap objectives, and validated gradients |
 | M3 - Inverse-design MVP v0.4 | Complete | Constrained phase parameterization, regularization, optimization runner, checkpoints, and deterministic smoke optimization |
-| M4 - Robust flagship v1.0 | Planned | Robust multi-plane mode conversion, held-out perturbation results, cross-model validation, and the new CLI/dashboard identity |
+| M4 - Robust flagship v1.0 | Complete | Robust multi-plane mode conversion, disjoint held-out perturbation results, independent cross-model validation, and the wave-first CLI/dashboard identity |
 
 ### M0 - Pivot Foundation
 

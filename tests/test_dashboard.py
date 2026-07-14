@@ -10,10 +10,13 @@ from quantum_dynamics_lab.dashboard import (
     DashboardParameters,
     build_experiment_config,
     experiment_summary,
+    load_flagship_dashboard_summary,
     plot_diagnostic_panels,
     plot_double_slit_panels,
     plot_field_panels,
+    plot_wave_field_panels,
     run_dashboard_experiment,
+    run_dashboard_wave_forward,
     run_dashboard_zeno_sweep,
 )
 
@@ -181,6 +184,25 @@ def test_dashboard_zeno_sweep_writes_comparison_artifacts(tmp_path) -> None:
     assert sweep.outputs["html_report"].exists()
 
 
+def test_dashboard_wave_forward_and_flagship_reference(tmp_path) -> None:
+    repository_root = Path(__file__).parents[1]
+    wave = run_dashboard_wave_forward(
+        repository_root / "examples" / "gaussian_lens.toml",
+        tmp_path / "wave",
+    )
+    figures = plot_wave_field_panels(wave.run)
+    reference = load_flagship_dashboard_summary(repository_root)
+
+    assert wave.run_path.exists()
+    assert wave.run.metrics["power_efficiency"] == pytest.approx(1.0, abs=1e-13)
+    assert len(figures) == 2
+    assert all(len(figure.axes) == 4 for figure in figures)
+    assert reference.comparison["robustness_claim_passed"]
+    assert reference.validation["trusted"]
+    for figure in figures:
+        plt.close(figure)
+
+
 def test_streamlit_dashboard_starts_without_errors() -> None:
     pytest.importorskip("streamlit")
     from streamlit.testing.v1 import AppTest
@@ -189,4 +211,10 @@ def test_streamlit_dashboard_starts_without_errors() -> None:
     app = AppTest.from_file(str(app_path), default_timeout=10).run()
 
     assert not app.exception
-    assert app.title[0].value == "2D Quantum Dynamics Lab"
+    assert app.title[0].value == "Differentiable 2D Wave Inverse-Design Lab"
+    assert [tab.label for tab in app.tabs[:4]] == [
+        "Forward Optics",
+        "Inverse Design",
+        "Validated Flagship",
+        "Legacy Quantum",
+    ]
