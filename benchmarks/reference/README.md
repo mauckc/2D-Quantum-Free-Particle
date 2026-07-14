@@ -1,0 +1,34 @@
+# Reference Metrics
+
+This directory holds small, committed numerical reference data used to detect
+regressions and document validated ranges.
+
+Reference files should contain metrics and tolerances, not large wave fields,
+videos, or generated reports. Each file must identify:
+
+- the generating config;
+- the metric definition;
+- the expected value or acceptable range;
+- the numerical tolerance and its justification;
+- the implementation or milestone that established the reference.
+
+Large run outputs belong under ignored `runs/` or `reports/` directories and may
+be published as CI artifacts or release assets.
+
+## Quantum v0.1 baseline
+
+`quantum_v0_1.json` freezes scalar metrics from the committed free-packet,
+barrier/Zeno, and double-slit example configurations. The reference generator
+forces the NumPy complex128 backend and includes both unmeasured and measured
+variants of the barrier configuration.
+
+Regenerate the file from the repository root with:
+
+```bash
+uv run python benchmarks/reference/generate_quantum_v0_1.py
+```
+
+The recorded tolerances allow only floating-point/FFT roundoff across supported
+platforms. They are regression tolerances, not uncertainty estimates and not
+evidence that the current Zeno or double-slit interpretation is physically
+validated.

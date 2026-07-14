@@ -1,0 +1,69 @@
+{
+  "backend": "numpy",
+  "baseline": "quantum-v0.1",
+  "cases": {
+    "barrier_unmeasured": {
+      "config": "examples/barrier_zeno.toml",
+      "metrics": {
+        "final_absorbed_probability": 0.045686116777975495,
+        "final_detected_probability": 0.0,
+        "final_norm": 1.0,
+        "final_survival_weight": 0.9543138832220236,
+        "final_transmission_probability": 0.28070090803770054,
+        "final_unconditional_transmission_probability": 0.2678767735734061,
+        "max_norm_drift": 6.661338147750939e-16,
+        "probability_balance": 0.9999999999999991
+      },
+      "variant": "unmeasured"
+    },
+    "barrier_zeno": {
+      "config": "examples/barrier_zeno.toml",
+      "metrics": {
+        "final_absorbed_probability": 0.02749633502890713,
+        "final_detected_probability": 0.34532918079639185,
+        "final_norm": 0.9999999999999998,
+        "final_survival_weight": 0.6271744841747007,
+        "final_transmission_probability": 0.004262215749605428,
+        "final_unconditional_transmission_probability": 0.0026731529642000694,
+        "max_norm_drift": 6.661338147750939e-16,
+        "probability_balance": 0.9999999999999997
+      },
+      "variant": "committed"
+    },
+    "double_slit": {
+      "config": "examples/double_slit.toml",
+      "metrics": {
+        "coherent_interference_contrast": 0.998964581837934,
+        "coherent_screen_profile_integral": 0.26118905072489196,
+        "final_norm": 1.0000000000002458,
+        "final_which_path_norm": 1.0000000000002538,
+        "max_norm_drift": 2.4580337765200966e-13,
+        "which_path_interference_contrast": 0.9836160725125962,
+        "which_path_screen_profile_integral": 0.25557573408749956
+      },
+      "variant": "committed"
+    },
+    "free_packet": {
+      "config": "examples/free_packet.toml",
+      "metrics": {
+        "final_norm": 1.0,
+        "final_x_mean": -1.399999998505502,
+        "final_x_variance": 0.28999999966069756,
+        "final_y_mean": -0.3000000000000019,
+        "final_y_variance": 0.2899999999999989,
+        "max_norm_drift": 6.661338147750939e-16
+      },
+      "variant": "committed"
+    }
+  },
+  "milestone": "M0 - Pivot foundation",
+  "package_version": "0.1.0",
+  "schema_version": 1,
+  "scientific_interpretation": "These values freeze numerical behavior. They do not independently validate the no-click Zeno or global min/max double-slit diagnostics.",
+  "source_commit": "dfd3d5b54ee3e0475bb48ee33439b3b1b6f3beff",
+  "tolerance": {
+    "absolute": 1e-10,
+    "justification": "The cases use deterministic NumPy complex128 FFT propagation. The tolerance permits platform-level floating-point roundoff while remaining sensitive to solver and experiment changes.",
+    "relative": 1e-09
+  }
+}
