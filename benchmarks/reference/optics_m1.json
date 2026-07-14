@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "scope": "monochromatic coherent scalar free-space optics",
+  "configuration": {
+    "wavelength_m": 1.064e-06,
+    "gaussian_waist_m": 0.00045,
+    "gaussian_distance_m": 0.18,
+    "cross_model_grid": 192,
+    "cross_model_extent_m": 0.006,
+    "cross_model_waist_m": 0.00055,
+    "cross_model_distance_m": 0.12
+  },
+  "metrics": {
+    "gaussian_relative_l2_coarse": 2.430056748786594e-05,
+    "gaussian_relative_l2_fine": 6.2077594479344e-11,
+    "gaussian_convergence_ratio": 2.5545738596574486e-06,
+    "focal_waist_relative_error": 5.49591483434142e-11,
+    "fresnel_power_relative_drift": 2.220446049250313e-16,
+    "fresnel_reverse_max_error": 6.885699021235836e-13,
+    "angular_retained_spectral_power": 1.0,
+    "angular_power_relative_drift": 0.0,
+    "angular_reverse_max_error": 6.897620878004985e-13,
+    "cross_model_complex_relative_l2": 1.5596658134410832e-08,
+    "cross_model_intensity_relative_l2": 8.432662212334868e-09
+  },
+  "declared_limits": {
+    "gaussian_relative_l2_fine_max": 1e-09,
+    "gaussian_convergence_ratio_max": 0.0001,
+    "focal_waist_relative_error_max": 0.01,
+    "power_relative_drift_max": 1e-13,
+    "reverse_max_error_max": 1e-10,
+    "cross_model_relative_l2_max": 5e-06,
+    "minimum_retained_spectral_power": 0.9999999999999
+  }
+}
