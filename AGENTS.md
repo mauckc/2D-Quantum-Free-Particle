@@ -19,13 +19,13 @@ direction and milestone gates; it is not a daily task list.
 
 ## Current Priority
 
-**M0 - Pivot foundation**, **M1 - Forward optics v0.2**, **M2 - Differentiable
-solver v0.3**, and **M3 - Inverse-design MVP v0.4** are complete. The current
-priority is **M4 - Robust flagship v1.0**: run the declared Gaussian-to-HG10
-baseline ladder, separate optimization and held-out perturbations, validate
-grid/padding/aperture/step convergence, and report Fresnel-to-band-limited-
-angular-spectrum transfer before completing the CLI/dashboard/documentation
-identity. Do not claim robustness from the optimization ensemble alone.
+**M0 - Pivot foundation** through **M4 - Robust flagship v1.0** are complete.
+The current priority is release maintenance: preserve the committed v1.0
+evidence, public `wave-lab` and `quantum-lab` interfaces, and NumPy/JAX/model-
+transfer regression gates. Scope post-v1 behavioral work through an issue and,
+when it changes the product boundary or scientific claims, an accepted ADR with
+matching evidence. Do not broaden the scalar-model validity claims without new
+validation.
 
 ## Project Invariants
 

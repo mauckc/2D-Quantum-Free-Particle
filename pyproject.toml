@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "quantum-dynamics-lab"
-version = "0.1.0"
-description = "Reproducible 2D quantum dynamics experiments with a NumPy split-step solver."
+version = "1.0.0"
+description = "Differentiable 2D scalar-wave propagation and inverse design with preserved quantum demos."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
