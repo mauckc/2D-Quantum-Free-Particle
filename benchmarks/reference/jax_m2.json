@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "seed": 20260714,
+  "configuration": {
+    "grid": 32,
+    "extent_m": 0.004,
+    "wavelength_m": 1.064e-06,
+    "waist_m": 0.00055,
+    "planes": 3,
+    "distances_m": [
+      0.04,
+      0.05,
+      0.03
+    ],
+    "finite_difference_step": 1e-05,
+    "jax_platform": "cpu",
+    "jax_x64": true
+  },
+  "metrics": {
+    "objective_value_max_abs_error": 2.220446049250313e-16,
+    "mode_gradient": {
+      "loss": 0.9998790977600355,
+      "autodiff_directional_derivative": 5.914684986973689e-05,
+      "finite_difference_directional_derivative": 5.914685408114905e-05,
+      "absolute_error": 4.211412163825697e-12,
+      "relative_error": 7.120264009388682e-08
+    },
+    "intensity_gradient": {
+      "loss": 0.4581730315245507,
+      "autodiff_directional_derivative": -0.0043391327250071774,
+      "finite_difference_directional_derivative": -0.004339132708697235,
+      "absolute_error": 1.6309942112158193e-11,
+      "relative_error": 3.758802310461987e-09
+    },
+    "compiled_update_loss": 0.9998790977600355,
+    "compiled_update_gradient_norm": 0.0031515730396352256,
+    "compiled_update_all_finite": true
+  },
+  "declared_limits": {
+    "objective_value_max_abs_error": 1e-12,
+    "gradient_absolute_error": 1e-09,
+    "gradient_relative_error": 1e-06
+  }
+}

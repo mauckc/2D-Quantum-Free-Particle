@@ -49,7 +49,7 @@ M0 Pivot foundation
 | --- | --- | --- |
 | M0 - Pivot foundation | Complete | Durable context, workflow templates, accepted decisions, corrected framing, and a frozen quantum v0.1 regression baseline |
 | M1 - Forward optics v0.2 | Complete | Pure propagation core plus validated scalar-optics sources, elements, Fresnel propagation, and angular-spectrum propagation |
-| M2 - Differentiable solver v0.3 | Planned | JAX parity, JIT-compatible propagation, mode-overlap objectives, and validated gradients |
+| M2 - Differentiable solver v0.3 | Complete | JAX parity, JIT-compatible propagation, mode-overlap objectives, and validated gradients |
 | M3 - Inverse-design MVP v0.4 | Planned | Constrained phase parameterization, regularization, optimization runner, checkpoints, and deterministic smoke optimization |
 | M4 - Robust flagship v1.0 | Planned | Robust multi-plane mode conversion, held-out perturbation results, cross-model validation, and the new CLI/dashboard identity |
 
