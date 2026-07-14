@@ -19,11 +19,12 @@ direction and milestone gates; it is not a daily task list.
 
 ## Current Priority
 
-**M0 - Pivot foundation** is complete. The next behavioral work is the first
-part of **M1 - Forward optics v0.2**: extract a pure, backend-neutral
-propagation kernel and then make the maintained quantum solver delegate to it
-without changing recorded quantum v0.1 results. Do not add JAX, optimization,
-or more dashboard features ahead of that compatibility-preserving refactor.
+**M0 - Pivot foundation** and **M1 - Forward optics v0.2** are complete. The
+next behavioral work is **M2 - Differentiable solver v0.3**: add optional JAX
+execution without replacing NumPy as the correctness reference, establish
+value parity, add array-native objectives, and validate gradients with centered
+directional finite differences. Do not add the optimization engine or more
+dashboard features ahead of those differentiation gates.
 
 ## Project Invariants
 

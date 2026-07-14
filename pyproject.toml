@@ -23,6 +23,7 @@ ui = [
 
 [project.scripts]
 quantum-lab = "quantum_dynamics_lab.cli:main"
+wave-lab = "quantum_dynamics_lab.wave_cli:main"
 
 [dependency-groups]
 dev = [

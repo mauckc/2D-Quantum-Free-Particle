@@ -1,0 +1,20 @@
+name = "gaussian_lens_focus"
+
+[grid]
+shape = 256
+extent_m = 0.004
+wavelength_m = 1.064e-6
+
+[source]
+kind = "gaussian"
+waist_m = 0.00055
+center_m = [0.0, 0.0]
+
+[[steps]]
+kind = "lens"
+focal_length_m = 0.18
+
+[[steps]]
+kind = "propagate"
+model = "fresnel"
+distance_m = 0.18
