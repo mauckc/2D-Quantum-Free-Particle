@@ -19,13 +19,13 @@ direction and milestone gates; it is not a daily task list.
 
 ## Current Priority
 
-**M0 - Pivot foundation**, **M1 - Forward optics v0.2**, and **M2 -
-Differentiable solver v0.3** are complete. The next behavioral work is **M3 -
-Inverse-design MVP v0.4**: add bounded phase parameterization, regularization
-and quantization constraints, then build deterministic Adam optimization with
-restart, early stopping, checkpoints, and complete provenance. Do not begin the
-robust flagship or dashboard redesign ahead of that reproducible optimization
-gate.
+**M0 - Pivot foundation**, **M1 - Forward optics v0.2**, **M2 - Differentiable
+solver v0.3**, and **M3 - Inverse-design MVP v0.4** are complete. The current
+priority is **M4 - Robust flagship v1.0**: run the declared Gaussian-to-HG10
+baseline ladder, separate optimization and held-out perturbations, validate
+grid/padding/aperture/step convergence, and report Fresnel-to-band-limited-
+angular-spectrum transfer before completing the CLI/dashboard/documentation
+identity. Do not claim robustness from the optimization ensemble alone.
 
 ## Project Invariants
 
