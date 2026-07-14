@@ -21,6 +21,7 @@ from quantum_dynamics_lab.experiments import run_experiment
 from quantum_dynamics_lab.grid import make_grid, norm, normalize
 from quantum_dynamics_lab.render import render_run
 from quantum_dynamics_lab.solver import SplitStepSolver
+from quantum_dynamics_lab.wavepackets import gaussian_packet
 
 
 def test_free_packet_norm_drift_stays_small() -> None:
@@ -64,6 +65,28 @@ def test_fft_backend_selection_and_missing_optional_errors() -> None:
             create_backend("cupy")
     else:
         assert create_backend("cupy").name == "cupy"
+
+
+def test_solver_delegates_to_pure_propagation_kernel(monkeypatch: pytest.MonkeyPatch) -> None:
+    import quantum_dynamics_lab.solver as solver_module
+
+    grid = make_grid(GridConfig(n=16, length=8.0))
+    solver_config = SolverConfig(dt=0.01, tf=0.01, frame_interval=0.01)
+    solver = SplitStepSolver(grid, np.zeros((grid.n, grid.n)), solver_config)
+    psi = gaussian_packet(WavePacketConfig(), grid)
+    calls: list[str] = []
+    original = solver_module.propagate_split_step
+
+    def recording_kernel(field, operators, *, backend):
+        calls.append(backend.name)
+        return original(field, operators, backend=backend)
+
+    monkeypatch.setattr(solver_module, "propagate_split_step", recording_kernel)
+
+    result = solver.step_with_diagnostics(psi)
+
+    assert calls == [solver.backend_name]
+    assert result.psi.dtype == np.complex128
 
 
 def test_barrier_zeno_fast_measurement_reduces_detection() -> None:
