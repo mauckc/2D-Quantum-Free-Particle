@@ -17,6 +17,7 @@ dependencies = [
 [project.optional-dependencies]
 fftw = ["pyfftw>=0.15"]
 cuda12 = ["cupy-cuda12x>=13"]
+jax = ["jax>=0.4.35"]
 ui = [
     "streamlit>=1.59.2",
 ]
@@ -32,3 +33,6 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "jax: requires the optional JAX CPU dependency",
+]
